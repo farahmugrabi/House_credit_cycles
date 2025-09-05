@@ -396,7 +396,7 @@ ggsave(paste0(save_plots,"/Data/gni_plot.pdf"), gni_plot, height = 20, width = 2
 #Export data
 # write.csv(data_model, paste0(path, "/data_model_nominal.csv"), row.names = FALSE)
 # write.csv(data, paste0(path, "/data_full.csv"), row.names = FALSE)
-write.csv(data_model_r, paste0(path, "/data_model.csv"), row.names = FALSE)
+write.csv(data_model_r, paste0(base_path, "/A_Main_Code/data_model.csv"), row.names = FALSE)
 
 #Descriptive statistics-------------------------------------
 df_selected <- data %>%

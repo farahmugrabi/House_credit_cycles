@@ -35,7 +35,8 @@ function [CC,Cmax,Clag] = Sample_CCF(Cycles,D_,k,flag)
       
    for i = 1:n
    for j = 1:n
-       c         = crosscorr(Cycles(:,i),Cycles(:,j),k);
+       %c         = crosscorr(Cycles(:,i),Cycles(:,j),k);
+       c         = xcorr_nv(Cycles(:,i),Cycles(:,j),k);
        CC(i,j,:) = c;
        Cmax(i,j) = max(abs(c));
        Clag(i,j) = find(Cmax(i,j)==abs(c));

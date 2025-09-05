@@ -16,7 +16,8 @@ function [T,S,C] = graphs_mv(Date,Ym,Z,R,R_s,M_,Names)
 %  C                Cycles                                 [T x n]
 %__________________________________________________________________________
   
-  Datp  = Date(:,1) + (Date(:,2)-1) / 4;
+  % Datp  = Date(:,1) + (Date(:,2)-1) / 4;
+  Datp  = Date(:,1) + (Date(:,1)-1) / 4;
   color = {[1 0 0] [0 0.5 0] [0 0 1] [1 0 1]}; 
   j     = 1:5:5*size(Ym,2);
   

@@ -2,82 +2,50 @@
 % MAIN PROGRAM FOR THE DIFFUSE TIME VARIANT KALMAN-FILTER         
 % Estimates the model for US GDP/CTR/HPR with slopes for CTR and HPR 
 % restricted to .001. Similar cycles for CTR and HPR imposed.  
+% Uncomment Pseudo Real Time only if needed, it might be computationally
+% intensive
 %__________________________________________________________________________
 
 clear
 clc
-Base_Dir = '\\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\A_Main_Code';
+Base_Dir = pwd;
 addpath(genpath(Base_Dir));
  
 %__________________________________________________________________________
-% Data - Main model
+% Data - Main model 
 %__________________________________________________________________________
 name_results="main";  
-ctry  = 'IE';    
-   data=load([Base_Dir '\data_model.csv']);
-   Date = data(:,1:4);
-   X=data(:,2:4);
-   
-  Ym       = X(13:end,1:3);
-  Date     = Date(13:end,1:3);
-  Label{1} = [ctry,': GDP'];
-  Label{2} = [ctry,': CTR'];
-  Label{3} = [ctry,': HPR'];
-  
-%__________________________________________________________________________
-% Data - Robustness checks
-%__________________________________________________________________________
+ctry  = 'IE';
 
-%   ctry  = 'IE';    
-% %   1. Sub_sample_1: 1990q1 60, 2024q3 199
-%   name_results="Sub_sample_1";
-%   data=load([Base_Dir '\data_model.csv']);
-%   data=data(60:end,:);
-  
-%   2. Sub_sample_2: 1975q1 1, 2019q4 180
-%   name_results="Sub_sample_2";
-%   data=load([Base_Dir '\data_model.csv']);
-%   data=data(1:180,:);
-   
-  %3. Boost
-%   name_results="boost";
-%   Robcheck_Dir='\\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\C_Robustness_Checks\2.Extreme_forecasts';
-%   data=load([Robcheck_Dir '\data_model_boost.csv']);
-%    
-  %4.Crash
-%   name_results="crash";
-%   Robcheck_Dir='\\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\C_Robustness_Checks\2.Extreme_forecasts';
-%   data=load([Robcheck_Dir '\data_model_crash.csv']);
+T = readtable(fullfile(Base_Dir,'data_model.csv'), ...
+              'ReadVariableNames', false, 'Delimiter', ',');
 
-  %5.Baseline
-%   name_results="baseline";
-%   Robcheck_Dir='\\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\C_Robustness_Checks\2.Extreme_forecasts';
-%   data=load([Robcheck_Dir '\data_model_baseline.csv']);
+DateStr = string(T{:,1});
+X       = T{:,2:4};       
 
-% % 6. New data, estimation revision, I made a function to to it across all
-%   global data_limit name_results;%(new)
-%   data=data(1:data_limit,:);%(new)
-%   
-% 7 New data, estimation revision, this is to do it one by one manually
-% insted of runing the master recursive
-% name_results="nd12";%from nd1 to nd12 (new)
-% data=load([Base_Dir '\data_model.csv']);
-% data=data(187:199,:);%from 187 to 198 for the last 12 quarters(new)
+y = double(extractBefore(DateStr,'q'));
+q = double(extractAfter (DateStr,'q'));
+Date = [datenum(datetime(y, q*3, 1))];  % [datenum] 
 
-%   8.Reach thresholds
-  name_results="reach_thresholds";
-  Robcheck_Dir='\\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\C_Robustness_Checks\2.Extreme_forecasts';
-  data=load([Robcheck_Dir '\data_model_reach_thresholds.csv']);
+data = X;
+Ym       = X(13:end,1:3);
+
+Date     = Date(13:end,1);
+Label{1} = [ctry,': GDP'];
+Label{2} = [ctry,': CTR'];
+Label{3} = [ctry,': HPR'];
 
 %__________________________________________________________________________
-   Date = data(:,1:4);
-   X=data(:,2:4);
-   
-  Ym       = X(13:end,1:3);
-  Date     = Date(13:end,1:3);
-  Label{1} = [ctry,': GDP'];
-  Label{2} = [ctry,': CTR'];
-  Label{3} = [ctry,': HPR'];
+% Data - Pseudo Real Time 
+%__________________________________________________________________________
+% global data_limit name_results;
+% X = data(1:data_limit, :);
+% data = data(1:data_limit, :);
+% Date = Date(1:data_limit, 1);
+% 
+% Ym   = data(13:end, 1:3);
+% Date = Date(13:end, 1);
+
 %__________________________________________________________________________
 % Model
 % p(40) - p(42) contain the phase shifts xi(2) ... xi(n)
@@ -178,9 +146,6 @@ ctry  = 'IE';
   M_.p0(50) =  0.000001000000;      M_.ps(50) = 1000;      M_.px(50) = 0;      
   M_.p0(51) =  0.000001000000;      M_.ps(51) = 1000;      M_.px(51) = 0;      
   M_.p0(52) =  0.000001000000;      M_.ps(52) = 1000;      M_.px(52) = 0; 
- 
-
-  
 
 %__________________________________________________________________________
 %  FINAL ESTIMATE FROM RUNSTLER / VLEKKE
@@ -277,7 +242,6 @@ ctry  = 'IE';
   M_.p0(56) = -0.017467442261;      M_.ps(56) = 1;         M_.px(56) = 1;      
   M_.p0(57) = -0.015893654614;      M_.ps(57) = 1;         M_.px(57) = 1; 
 
-
 %__________________________________________________________________________
 %  Estimation options 
 %  The Similar cycles restriction implies that
@@ -325,7 +289,6 @@ ctry  = 'IE';
 %  fpath = [Base_Dir '\FSS_V3\' ctry '\Plots\'];
   fpath = [];
 
-  
 %__________________________________________________________________________
 %  Estimation                                                    
 %__________________________________________________________________________
@@ -360,7 +323,7 @@ ctry  = 'IE';
   if tst_flag
       Sv_        =  UOC_tests(Date,Ym,R,S.nd);
       SG_        =  GFC_Diagnostics(Ym,M_,S,p_,fpath,ctry); 
-      [CC,Cm,Cl]  =  Sample_CCF(Cycles,SG_,20,1); %It was a Missing function in From Dmitry file, we received this one 16.01.24 Farah
+      [CC,Cm,Cl]  =  Sample_CCF(Cycles,SG_,20,1);
       Cycles_t   =  PRT_Estimates(Date,Ym,M_,S,p_,37,size(Ym,1)-20);
   end
  
@@ -373,8 +336,8 @@ ctry  = 'IE';
   CycCFS   = CF_filter(Ym,8,32);  
   CycCF_t  = PRT_CFfilter(Date,Ym,[8 32 32],[32 120 120],37,size(Ym,1)-20); 
   
-graphs_mv_annex(Date,Ym,S.Z,R,R_s,M_,fpath,ctry); %It was a Missing function in From Dmitry file, we received this one 16.01.24 Farah
-graphs_mv_pres(Date,Ym,S.Z,R,R_s,M_,fpath,ctry); %It was a Missing function in From Dmitry file, we received this one 16.01.24 Farah
+graphs_mv_annex(Date,Ym,S.Z,R,R_s,M_,fpath,ctry); 
+graphs_mv_pres(Date,Ym,S.Z,R,R_s,M_,fpath,ctry); 
   
 %__________________________________________________________________________
 % Saving estimates of cycles to xls
@@ -398,16 +361,11 @@ graphs_mv_pres(Date,Ym,S.Z,R,R_s,M_,fpath,ctry); %It was a Missing function in F
 %__________________________________________________________________________ 
  Print_pars(p_,M_.ps,M_.px,lv,0)  
 
- writematrix(Cycles,[Base_Dir '\Outcome\Cycles_Dynare.xlsx'])
+ %writematrix(Cycles,[Base_Dir '\Outcome\Cycles_Dynare.xlsx'])
   
  %Export results: data, trend, cycle
  Results=[data(13:end,:),Trends, Cycles];
  writematrix(Results,strcat(Base_Dir, '\Outcome\Results_', name_results, '.xlsx'));
  
-  %writematrix(Results,strcat(Base_Dir,
-  %'\Outcome\New_Data_revision\Results_', name_results, '.xlsx'));
- name_results="oneside";  
- ONESIDE= Cycles_t.C20;
- writematrix(ONESIDE,strcat(Base_Dir, '\Outcome\Results_', name_results, '.xlsx'));
- 
- 
+ oneside_= Cycles_t.C20;
+ writematrix(oneside_,strcat(Base_Dir, '\Outcome\Results_', "oneside", '.xlsx'));

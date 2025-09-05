@@ -27,8 +27,9 @@ function [T,S,C] = graphs_mv_annex(Date,Ym,Z,R,R_s,M_,fpath,ctry)
   Cycles_CF      = CF_filter(Ym,32,120);
   Cycles_CF(:,1) = CF_filter(Ym(:,1),8,32);  
 
-  Datp  = Date(:,1) + (Date(:,2)-1) / 4;
-  
+  %Datp  = Date(:,1) + (Date(:,2)-1) / 4;
+  Datp  = Date(:,1) + (Date(:,1)-1) / 4;
+
   Label{1} = '$Y_{t}$: data and trend';
   Label{2} = '$C_{t}$: data and trend';
   Label{3} = '$P_{t}$: data and trend';

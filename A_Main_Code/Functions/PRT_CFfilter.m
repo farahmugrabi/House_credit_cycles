@@ -40,7 +40,7 @@ function [Cyc_t] = PRT_CFfilter(Date,Ym,lo,up,t_1,t_2)
   disp(' ')
   disp(['' kron('_',ones(1,75))])
   disp('Real-time estimates CF filter: sample moments cycles')
-  disp(['Stat from ' num2str(Date(t_1,:)) ' to  ' num2str(Date(t_2,:))])
+  disp(['Stat from ' num2str(Date(t_1,:)) ' to  ' num2str(Date(t_2,:))]);
   disp(['' kron('_',ones(1,75))])
   figure
  

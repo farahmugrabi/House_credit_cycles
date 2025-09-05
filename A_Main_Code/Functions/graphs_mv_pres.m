@@ -27,8 +27,9 @@ function [T,S,C] = graphs_mv_pres(Date,Ym,Z,R,R_s,M_,fpath,ctry)
   Cycles_CF      = CF_filter(Ym,32,120);
   Cycles_CF(:,1) = CF_filter(Ym(:,1),8,32);  
 
-  Datp  = Date(:,1) + (Date(:,2)-1) / 4;
-  
+  % Datp  = Date(:,1) + (Date(:,2)-1) / 4;
+  Datp  = Date(:,1) + (Date(:,1)-1) / 4;
+
   Label{1} = 'GDP';
   Label{2} = 'Credit';
   Label{3} = 'House Prices';
