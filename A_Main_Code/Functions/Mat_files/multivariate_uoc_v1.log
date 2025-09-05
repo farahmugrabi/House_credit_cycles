@@ -1,0 +1,798 @@
+Starting Dynare (version 4.4.3).
+Starting preprocessing of the model file ...
+Found 21 equation(s).
+Evaluating expressions...done
+Computing static model derivatives:
+ - order 1
+Computing dynamic model derivatives:
+ - order 1
+ - order 2
+Processing outputs ...done
+Preprocessing completed.
+Starting MATLAB/Octave computing.
+lab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_config.m',172,1)">dynare_config at 172</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',48,1)">dynare at 48</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\bsxfun\bsxfun.m has
+the same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_config.m',188,1)">dynare_config at 188</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',48,1)">dynare at 48</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\ilu\ilu.m has the
+same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_config.m',188,1)">dynare_config at 188</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',48,1)">dynare at 48</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\ordeig\ordeig.m has
+the same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_config.m',188,1)">dynare_config at 188</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',48,1)">dynare at 48</a>] 
+
+Configuring Dynare ...
+[mex] Generalized QZ.
+[mex] Sylvester equation solution.
+[mex] Kronecker products.
+[mex] Sparse kronecker products.
+[mex] Local state space iteration (second order).
+[mex] Bytecode evaluation.
+[mex] k-order perturbation solver.
+[mex] k-order solution simulation.
+[mex] Quasi Monte-Carlo sequence (Sobol).
+[mex] Markov Switching SBVAR.
+
+Starting Dynare (version 4.4.3).
+Starting preprocessing of the model file ...
+Found 21 equation(s).
+Evaluating expressions...done
+Computing static model derivatives:
+ - order 1
+Computing dynamic model derivatives:
+ - order 1
+ - order 2
+Processing outputs ...done
+Preprocessing completed.
+Starting MATLAB/Octave computing.
+
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\bsxfun\bsxfun.m has
+the same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\US_data.m',15,1)">US_data at 15</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\read_variables.m',71,1)">read_variables at 71</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\utilities\dataset\initialize_dataset.m',32,1)">initialize_dataset at 32</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_init.m',475,1)">dynare_estimation_init at 475</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_1.m',81,1)">dynare_estimation_1 at 81</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation.m',89,1)">dynare_estimation at 89</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',309,1)">multivariate_uoc_v1 at 309</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\ilu\ilu.m has the
+same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\US_data.m',15,1)">US_data at 15</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\read_variables.m',71,1)">read_variables at 71</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\utilities\dataset\initialize_dataset.m',32,1)">initialize_dataset at 32</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_init.m',475,1)">dynare_estimation_init at 475</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_1.m',81,1)">dynare_estimation_1 at 81</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation.m',89,1)">dynare_estimation at 89</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',309,1)">multivariate_uoc_v1 at 309</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\ordeig\ordeig.m has
+the same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\US_data.m',15,1)">US_data at 15</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\read_variables.m',71,1)">read_variables at 71</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\utilities\dataset\initialize_dataset.m',32,1)">initialize_dataset at 32</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_init.m',475,1)">dynare_estimation_init at 475</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_1.m',81,1)">dynare_estimation_1 at 81</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation.m',89,1)">dynare_estimation at 89</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',309,1)">multivariate_uoc_v1 at 309</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+Loading 168 observations from US_data.m
+
+Initial value of the log posterior (or likelihood): 1630.3484
+
+========================================================== 
+   Change in the covariance matrix = 10.
+   Mode improvement = 215.3707
+   New value of jscale = 4.8311e-05
+========================================================== 
+
+========================================================== 
+   Change in the covariance matrix = 4.9373e-05.
+   Mode improvement = 0.011413
+   New value of jscale = 0.44246
+========================================================== 
+
+========================================================== 
+   Change in the covariance matrix = 0.015027.
+   Mode improvement = 18.792
+   New value of jscale = 0.167
+========================================================== 
+
+Optimal value of the scale parameter = 0.167
+
+Final value of the log posterior (or likelihood): -1864.5225
+
+
+RESULTS FROM POSTERIOR ESTIMATION
+parameters
+           prior mean     mode    s.d. prior pstdev
+
+rrho           0.750   0.9456  0.0433 beta  0.2000 
+pphi           0.750   0.8814  0.0678 beta  0.2000 
+llambda        0.200   0.1200  0.0763 norm  0.2000 
+a11            0.005   0.0025  0.0009 invg     Inf 
+a22            0.005   0.0029  0.0005 invg     Inf 
+a33            0.005   0.0072  0.0023 invg     Inf 
+
+standard deviation of shocks
+           prior mean     mode    s.d. prior pstdev
+
+e_irr1         0.005   0.0018  0.0005 invg     Inf 
+e_irr2         0.005   0.0016  0.0002 invg     Inf 
+e_irr3         0.005   0.0016  0.0003 invg     Inf 
+e_lev1         0.001   0.0057  0.0018 invg     Inf 
+e_lev2         0.001   0.0005  0.0003 invg     Inf 
+e_lev3         0.001   0.0005  0.0005 invg     Inf 
+e_slp1         0.001   0.0004  0.0002 invg     Inf 
+e_slp2         0.001   0.0005  0.0008 invg     Inf 
+e_slp3         0.001   0.0004  0.0031 invg     Inf 
+
+correlation of shocks
+           prior mean     mode    s.d. prior pstdev
+
+e_lev1,e_lev2   0.000   0.2164  0.0277 beta  0.3000 
+e_lev1,e_lev3   0.000  -0.2166  0.1228 beta  0.3000 
+e_lev2,e_lev3   0.000  -0.1103  0.0532 beta  0.3000 
+e_slp1,e_slp2   0.000   0.2320  0.0513 beta  0.3000 
+e_slp1,e_slp3   0.000  -0.1840  0.0248 beta  0.3000 
+e_slp2,e_slp3   0.000   0.1241  0.0455 beta  0.3000 
+
+
+Log data density [Laplace approximation] is 1749.659799.
+
+Etimation::mcmc: One Chain mode.
+Estimation::mcmc: Initialization at the posterior mode.
+
+Estimation::mcmc: Write details about the MCMC... Ok!
+Estimation::mcmc: Details about the MCMC are available in multivariate_uoc_v1/metropolis\multivariate_uoc_v1_mh_history_0.mat
+
+
+Estimation::mcmc: Number of mh files: 1 per block.
+Estimation::mcmc: Total number of generated files: 1.
+Estimation::mcmc: Total number of iterations: 100.
+Estimation::mcmc: Current acceptance ratio per chain: 
+                                                       Chain  1: 25.7426%
+Estimation::mcmc: Total number of MH draws: 100.
+Estimation::mcmc: Total number of generated MH files: 1.
+Estimation::mcmc: I'll use mh-files 1 to 1.
+Estimation::mcmc: In MH-file number 1 I'll start at line 50.
+Estimation::mcmc: Finally I keep 50 draws.
+
+Estimation::marginal density: I'm computing the posterior mean and covariance... [Warning: Matrix is close to singular or badly scaled. Results may be
+inaccurate. RCOND =  2.506568e-18.] 
+[> In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\compute_mh_covariance_matrix.m',77,1)">compute_mh_covariance_matrix at 77</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\marginal_density.m',53,1)">marginal_density at 53</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_1.m',799,1)">dynare_estimation_1 at 799</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation.m',89,1)">dynare_estimation at 89</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',309,1)">multivariate_uoc_v1 at 309</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+[Warning: Matrix is close to singular or badly scaled. Results may be
+inaccurate. RCOND =  2.506568e-18.] 
+[> In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\marginal_density.m',59,1)">marginal_density at 59</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_1.m',799,1)">dynare_estimation_1 at 799</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation.m',89,1)">dynare_estimation at 89</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',309,1)">multivariate_uoc_v1 at 309</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+ Done!
+Estimation::marginal density: I'm computing the posterior log marginal density (modified harmonic mean)... [Warning: Matrix is close to singular or badly scaled. Results may be
+inaccurate. RCOND =  2.506568e-18.] 
+[> In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\marginal_density.m',69,1)">marginal_density at 69</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation_1.m',799,1)">dynare_estimation_1 at 799</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare_estimation.m',89,1)">dynare_estimation at 89</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',309,1)">multivariate_uoc_v1 at 309</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+Done!
+
+
+ESTIMATION RESULTS
+
+Log data density is 1631.724446.
+posterior_moments: There are not enough draws computes to compute HPD Intervals. Skipping their computation.
+posterior_moments: There are not enough draws computes to compute deciles. Skipping their computation.
+
+parameters
+               prior mean   post. mean        90% HPD interval    prior       pstdev
+
+rrho                0.750       0.9462      0.9387      0.9518   beta        0.2000
+pphi                0.750       0.8700      0.8587      0.8807   beta        0.2000
+llambda             0.200       0.1279      0.1089      0.1434   norm        0.2000
+a11                 0.005       0.0026      0.0024      0.0028   invg           Inf
+a22                 0.005       0.0030      0.0028      0.0031   invg           Inf
+a33                 0.005       0.0078      0.0075      0.0081   invg           Inf
+
+standard deviation of shocks
+               prior mean   post. mean        90% HPD interval    prior       pstdev
+
+e_irr1              0.005       0.0018      0.0013      0.0020   invg           Inf
+e_irr2              0.005       0.0016      0.0015      0.0017   invg           Inf
+e_irr3              0.005       0.0016      0.0016      0.0017   invg           Inf
+e_lev1              0.001       0.0058      0.0054      0.0064   invg           Inf
+e_lev2              0.001       0.0006      0.0005      0.0006   invg           Inf
+e_lev3              0.001       0.0005      0.0003      0.0007   invg           Inf
+e_slp1              0.001       0.0005      0.0004      0.0005   invg           Inf
+e_slp2              0.001       0.0005      0.0004      0.0006   invg           Inf
+e_slp3              0.001       0.0005      0.0003      0.0009   invg           Inf
+
+correlation of shocks
+               prior mean   post. mean        90% HPD interval    prior       pstdev
+
+e_lev1,e_lev2        0.000       0.2074      0.2039      0.2131   beta        0.3000
+e_lev1,e_lev3        0.000      -0.2022     -0.2193     -0.1813   beta        0.3000
+e_lev2,e_lev3        0.000      -0.1127     -0.1248     -0.1036   beta        0.3000
+e_slp1,e_slp2        0.000       0.2139      0.2047      0.2230   beta        0.3000
+e_slp1,e_slp3        0.000      -0.1764     -0.1876     -0.1655   beta        0.3000
+e_slp2,e_slp3        0.000       0.1232      0.1161      0.1330   beta        0.3000
+Estimation::mcmc: Smoothed variables
+Estimation::mcmc: Smoothed variables, done!
+Estimation::mcmc: Smoothed shocks
+Estimation::mcmc: Smoothed shocks, done!
+Estimation::mcmc: Updated Variables
+Estimation::mcmc: Updated Variables, done!
+Estimation::mcmc: One step ahead forecast (filtered variables)
+Estimation::mcmc: One step ahead forecast (filtered variables), done!
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\bsxfun\bsxfun.m has
+the same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\US_data.m',16,1)">US_data at 16</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',310,1)">multivariate_uoc_v1 at 310</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\ilu\ilu.m has the
+same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\US_data.m',16,1)">US_data at 16</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',310,1)">multivariate_uoc_v1 at 310</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+[Warning: Function C:\Apps\dynare\4.4.3\matlab\missing\ordeig\ordeig.m has
+the same name as a MATLAB builtin. We suggest you rename the function to
+avoid a potential name conflict.] 
+[> In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\path.m',110,1)">path at 110</a>
+  In <a href="matlab: opentoline('C:\Program Files\MATLAB\R2012b\toolbox\matlab\general\addpath.m',87,1)">addpath at 87</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\US_data.m',16,1)">US_data at 16</a>
+  In <a href="matlab: opentoline('P:\ECB business areas\DGR\Databases and Programme files\MPR\D - Other projects\Runstler\DYN\multivariate_uoc_v1.m',310,1)">multivariate_uoc_v1 at 310</a>
+  In <a href="matlab: opentoline('C:\Apps\dynare\4.4.3\matlab\dynare.m',180,1)">dynare at 180</a>] 
+
+Irregular =
+
+   -0.0005
+    0.0011
+   -0.0011
+    0.0011
+   -0.0008
+    0.0008
+   -0.0003
+    0.0007
+   -0.0012
+   -0.0004
+    0.0003
+   -0.0005
+    0.0011
+    0.0002
+   -0.0001
+   -0.0003
+   -0.0006
+    0.0002
+    0.0013
+   -0.0003
+   -0.0024
+    0.0019
+   -0.0003
+    0.0006
+   -0.0001
+   -0.0005
+    0.0002
+   -0.0000
+    0.0016
+   -0.0013
+   -0.0014
+   -0.0001
+    0.0019
+   -0.0013
+    0.0015
+    0.0004
+   -0.0015
+    0.0008
+   -0.0001
+   -0.0006
+   -0.0005
+    0.0004
+    0.0000
+    0.0000
+    0.0001
+    0.0004
+    0.0001
+   -0.0002
+   -0.0000
+   -0.0005
+    0.0005
+   -0.0002
+    0.0003
+   -0.0004
+    0.0004
+   -0.0002
+   -0.0002
+    0.0002
+   -0.0005
+    0.0008
+   -0.0005
+    0.0005
+   -0.0005
+    0.0001
+    0.0001
+   -0.0000
+    0.0003
+   -0.0007
+    0.0004
+    0.0002
+    0.0006
+   -0.0003
+   -0.0008
+    0.0003
+    0.0002
+   -0.0004
+    0.0001
+    0.0001
+   -0.0000
+    0.0006
+   -0.0003
+    0.0001
+   -0.0006
+    0.0003
+   -0.0003
+    0.0005
+   -0.0004
+    0.0005
+   -0.0000
+   -0.0003
+    0.0002
+    0.0001
+   -0.0007
+    0.0006
+   -0.0001
+    0.0002
+   -0.0005
+    0.0002
+    0.0003
+   -0.0001
+    0.0000
+   -0.0003
+   -0.0002
+    0.0006
+   -0.0001
+   -0.0003
+   -0.0004
+    0.0009
+   -0.0011
+    0.0011
+   -0.0004
+    0.0005
+   -0.0006
+    0.0006
+   -0.0004
+   -0.0004
+    0.0003
+    0.0001
+    0.0004
+   -0.0003
+   -0.0002
+   -0.0005
+    0.0004
+    0.0004
+   -0.0001
+   -0.0001
+    0.0000
+   -0.0002
+    0.0004
+   -0.0002
+    0.0001
+   -0.0004
+    0.0006
+    0.0001
+   -0.0005
+    0.0004
+   -0.0005
+   -0.0000
+    0.0001
+    0.0006
+   -0.0010
+    0.0006
+    0.0012
+   -0.0005
+   -0.0008
+   -0.0002
+   -0.0003
+    0.0005
+   -0.0003
+    0.0002
+    0.0000
+    0.0007
+   -0.0008
+    0.0003
+   -0.0006
+    0.0004
+    0.0001
+   -0.0001
+    0.0004
+   -0.0005
+    0.0002
+   -0.0004
+    0.0002
+    0.0010
+   -0.0011
+   -0.0001
+    0.0005
+   -0.0001
+
+
+Irregular =
+
+   -0.0006
+    0.0005
+    0.0008
+   -0.0007
+   -0.0007
+    0.0011
+    0.0005
+    0.0004
+   -0.0009
+   -0.0001
+   -0.0003
+   -0.0001
+   -0.0002
+    0.0006
+    0.0005
+   -0.0005
+   -0.0003
+   -0.0004
+    0.0012
+   -0.0003
+   -0.0003
+   -0.0001
+    0.0004
+   -0.0004
+    0.0010
+   -0.0013
+   -0.0001
+   -0.0007
+    0.0042
+   -0.0027
+    0.0000
+    0.0006
+   -0.0016
+    0.0001
+    0.0016
+   -0.0015
+    0.0005
+    0.0012
+   -0.0002
+   -0.0009
+    0.0003
+   -0.0001
+   -0.0006
+    0.0005
+   -0.0002
+    0.0008
+   -0.0014
+    0.0010
+    0.0008
+   -0.0008
+   -0.0017
+    0.0027
+   -0.0007
+   -0.0011
+   -0.0005
+    0.0027
+   -0.0013
+   -0.0001
+    0.0007
+   -0.0014
+    0.0006
+    0.0008
+   -0.0012
+    0.0007
+    0.0003
+   -0.0001
+   -0.0008
+   -0.0001
+    0.0014
+   -0.0010
+    0.0003
+    0.0008
+   -0.0013
+    0.0014
+   -0.0005
+   -0.0015
+    0.0020
+   -0.0010
+    0.0003
+   -0.0000
+   -0.0001
+   -0.0001
+    0.0001
+   -0.0006
+    0.0010
+   -0.0003
+   -0.0005
+    0.0003
+   -0.0001
+    0.0004
+   -0.0001
+   -0.0001
+   -0.0004
+   -0.0001
+    0.0011
+   -0.0005
+   -0.0003
+   -0.0001
+    0.0007
+   -0.0013
+    0.0001
+    0.0015
+   -0.0009
+   -0.0003
+    0.0013
+   -0.0022
+    0.0022
+   -0.0006
+   -0.0009
+    0.0008
+   -0.0002
+    0.0004
+   -0.0005
+    0.0000
+    0.0001
+   -0.0003
+    0.0006
+   -0.0000
+   -0.0007
+    0.0008
+   -0.0007
+    0.0004
+   -0.0000
+    0.0001
+    0.0004
+   -0.0006
+   -0.0005
+    0.0012
+   -0.0007
+    0.0004
+   -0.0001
+   -0.0011
+    0.0010
+    0.0007
+   -0.0011
+    0.0015
+   -0.0013
+   -0.0009
+    0.0009
+    0.0000
+    0.0007
+   -0.0000
+   -0.0003
+    0.0003
+   -0.0011
+    0.0006
+    0.0012
+   -0.0018
+    0.0010
+   -0.0011
+    0.0016
+   -0.0017
+    0.0016
+   -0.0006
+   -0.0010
+    0.0008
+    0.0001
+    0.0003
+   -0.0011
+    0.0011
+   -0.0005
+   -0.0005
+    0.0012
+   -0.0011
+    0.0009
+   -0.0002
+   -0.0008
+    0.0005
+
+
+Irregular =
+
+   -0.0001
+    0.0000
+    0.0003
+   -0.0006
+    0.0005
+   -0.0007
+    0.0018
+   -0.0018
+   -0.0003
+    0.0010
+   -0.0010
+    0.0022
+   -0.0008
+   -0.0023
+    0.0019
+    0.0003
+   -0.0016
+    0.0011
+    0.0005
+   -0.0013
+    0.0016
+   -0.0012
+    0.0006
+   -0.0006
+   -0.0001
+    0.0005
+   -0.0003
+    0.0004
+    0.0001
+   -0.0008
+    0.0007
+   -0.0003
+    0.0000
+    0.0003
+   -0.0003
+    0.0001
+   -0.0001
+    0.0003
+   -0.0003
+    0.0001
+   -0.0004
+    0.0004
+   -0.0002
+    0.0002
+   -0.0001
+   -0.0001
+    0.0002
+    0.0001
+   -0.0004
+    0.0003
+   -0.0004
+    0.0002
+    0.0001
+   -0.0002
+    0.0003
+   -0.0004
+    0.0001
+    0.0002
+    0.0001
+    0.0002
+   -0.0004
+    0.0000
+    0.0001
+   -0.0002
+    0.0005
+   -0.0001
+   -0.0006
+    0.0005
+    0.0001
+   -0.0000
+   -0.0001
+    0.0005
+   -0.0009
+    0.0004
+    0.0003
+   -0.0005
+    0.0004
+   -0.0001
+   -0.0000
+    0.0001
+   -0.0000
+   -0.0001
+   -0.0002
+    0.0004
+   -0.0001
+   -0.0001
+    0.0001
+    0.0001
+   -0.0002
+   -0.0000
+    0.0002
+   -0.0001
+   -0.0000
+    0.0001
+    0.0000
+    0.0002
+   -0.0003
+    0.0001
+   -0.0000
+   -0.0003
+    0.0005
+   -0.0002
+   -0.0003
+    0.0007
+   -0.0005
+    0.0001
+    0.0001
+   -0.0001
+   -0.0002
+    0.0004
+   -0.0003
+   -0.0001
+    0.0006
+   -0.0005
+    0.0001
+    0.0002
+   -0.0004
+    0.0001
+    0.0003
+   -0.0000
+   -0.0001
+   -0.0001
+   -0.0001
+    0.0001
+   -0.0001
+    0.0004
+   -0.0001
+   -0.0005
+    0.0001
+    0.0005
+   -0.0004
+   -0.0001
+    0.0009
+   -0.0003
+   -0.0011
+    0.0010
+   -0.0000
+   -0.0003
+   -0.0001
+    0.0003
+   -0.0000
+   -0.0003
+    0.0009
+    0.0002
+   -0.0019
+    0.0005
+    0.0004
+   -0.0001
+    0.0002
+    0.0006
+   -0.0010
+    0.0006
+   -0.0001
+   -0.0002
+    0.0003
+   -0.0004
+   -0.0002
+    0.0005
+   -0.0001
+   -0.0002
+   -0.0002
+    0.0004
+   -0.0002
+   -0.0001
+    0.0007
+   -0.0004
+   -0.0004
+    0.0003
+
+Total computing time : 0h45m49s
+Note: warning(s) encountered in MATLAB/Octave code

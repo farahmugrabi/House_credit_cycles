@@ -44,14 +44,11 @@ Please download the following folders and scripts, and place them all in the sam
 - 📂 **B.Data** (data generation)
   - 📂 Raw_data
   - 📑 0.Data.R
-- 📂 **F.Results**
-  - 📂 Plots
-- 📂 **utils/Structures.R** (utils)
-- 📂 **utils/Tables_Figures.R** (utils)
+
 
 # 📦 Requirements  
 - Please install the required R packages:  
-install.packages(c("matrixcalc","pracma","tidyr","dplyr","tidyverse","ggplot2","cowplot","tibble","rmgarch","doParallel", "beepr","patchwork", 'openxlsx', "zoo"))
+install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra"))
 
 # ⚙️ Instructions:  
 1. Find the following 4 scripts, 3 of them in utils folder 📂:
