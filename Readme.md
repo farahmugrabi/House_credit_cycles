@@ -31,6 +31,7 @@ If you use this code, please cite both the GitHub repository and the related art
 - Code tested under **R version 4.5.1 (2025-06-13 ucrt)**.  
 - Code tested under  **MATLAB R2024b**.  
 - MATLAB tools: **Optimization Toolbox**
+- Please install the required R packages: install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra","vars","urca","mnormt","tseriesChaos","tsDyn","bvartools","tidyverse","readr","readxl","writexl","data.table","xlsx","tseries","mFilter","ggpubr","countrycode","hpfilter","pROC","qpcR","janitor","fbroc","ipred","lava","recipes","caret","gridExtra"))
 
 # 📂 Download & Structure  
 Please download the following folders and scripts. The files and directories are the following:
@@ -54,10 +55,6 @@ Please download the following folders and scripts. The files and directories are
 - 📂 **C.Properties** (Early warning and Real Time)
   - 📑 C1.Bank_crisis.R (generation bank in distress dummies)
   - 📑 C2.Properties.R
-
-# 📦 Requirements  
-- Please install the required R packages:  
-install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra","vars","urca","mnormt","tseriesChaos","tsDyn","bvartools","tidyverse","readr","readxl","writexl","data.table","xlsx","tseries","mFilter","ggpubr","countrycode","hpfilter","pROC","qpcR","janitor","fbroc","ipred","lava","recipes","caret","gridExtra"))
 
 # ⚙️ Instructions:
 1. Download the full folder, do not change the location of the files or names.
