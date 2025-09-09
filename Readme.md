@@ -53,6 +53,8 @@ Please download the following folders and scripts. The files and directories are
     - 📂 Crisis_indicators: Babecky_et_al._(2012).xlsx, fred_exchange_rate_IE.xlsx, Laeven_and_Valencia_(2020).xlsx 
     - 📂 OBrien_Velasco: OBrienvelasco_results.xlsx 
 - 📂 **C.Properties** (Early warning and Real Time)
+  - 📂 1.Crisis_events
+    - 📈 0.Crisis_indicator.xlsx (dummy crisis based on multiple sources) 
   - 📑 C1.Bank_crisis.R (generation bank in distress dummies)
   - 📑 C2.Properties.R
 
