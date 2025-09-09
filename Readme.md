@@ -33,28 +33,42 @@ If you use this code, please cite both the GitHub repository and the related art
 - MATLAB tools: **Optimization Toolbox**
 
 # 📂 Download & Structure  
-Please download the following folders and scripts, and place them all in the same location:
+Please download the following folders and scripts. The files and directories are the following:
 - 📂 **A.Main_Code** (based on Rünstler, G. and Vlekke, M., 2018)
   - 📑 GF3_US_FIX_main.m (univariate master code)
   - 📑 GF3_S23_US_FIX_DYN_pars.m (multivariate master code)
   - 📑 Master_Recursive.m (pseudo real-time estimation master code)
-  - 📂 Outcome (save results)
+  - 📑 data_limit.mat (auxiliary structure)
+  - 📂 Outcome (save results, empty)
+  - 📂 Functions (utils, 43 auxiliary functions)
   - 📈 data_model.xlsx (data) 
   - 📂 Functions (util master codes)
 - 📂 **B.Data** (data generation)
-  - 📂 Raw_data
   - 📑 0.Data.R
+  - 📈 data_pre.xlsx (data) 
+  - 📂 Raw_data (data)
+    - 📂 Ban_capital: Assets_pre_2002.xlsx, Capital_Headroom.xlsx
+        - 📂 CBI_STATS: ie_table_a-4_credit_institutions_-_aggregate_balance_sheet.xlsx, Total Assets with Residency Breakdown_1992 to 2002.xlsx
+    - 📂 Crisis_indicators: Babecky_et_al._(2012).xlsx, fred_exchange_rate_IE.xlsx, Laeven_and_Valencia_(2020).xlsx 
+    - 📂 OBrien_Velasco: OBrienvelasco_results.xlsx 
+- 📂 **C.Properties** (Early warning and Real Time)
+  - 📑 C1.Bank_crisis.R (generation bank in distress dummies)
+  - 📑 C2.Properties.R
 
 # 📦 Requirements  
 - Please install the required R packages:  
-install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra"))
+install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra","vars","urca","mnormt","tseriesChaos","tsDyn","bvartools","tidyverse","readr","readxl","writexl","data.table","xlsx","tseries","mFilter","ggpubr","countrycode","hpfilter","pROC","qpcR","janitor","fbroc","ipred","lava","recipes","caret","gridExtra"))
 
 # ⚙️ Instructions:
 1. Download the full folder, do not change the location of the files or names.
 2. Follow @ to locate configurable options.
-4. Run ▶️ the master script from beginning to end.
+3. Run ▶️ the scripts in the following order:
+  - B.Data/0.Data.R
+  - A.Main_Code/GF3_S23_US_FIX_DYN_pars
+  - C.Properties/C1.Bank_crisis.R
+  - C.Properties/C2.Properties.R
 5. Notes 📝:
-- Data script updates data from different open source APIs.Data prior to the coverage of these APIs are provided by the Central Bank of Ireland and stored in the Data_pre folder.
+- 0.Data script updates data from different open source APIs.Data prior to the coverage of these APIs are provided by the Central Bank of Ireland and stored in the B.Data folder.
 - Benchmark results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_main.xlsx.
 - One side results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_oneside.xlsx, this is used for real time and early warning properties.
 - There, Pseudo Real Time estimates section is commented. It is set to generate estimates recursively from quarter 100 to 197, this can be change in Master_Recursive.m, results are store in A.Main_Code/Outcome/Results_n__.xlsx.
