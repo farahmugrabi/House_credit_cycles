@@ -38,13 +38,24 @@ Label{3} = [ctry,': HPR'];
 %__________________________________________________________________________
 % Data - Pseudo Real Time 
 %__________________________________________________________________________
-% global data_limit name_results;
-% X = data(1:data_limit, :);
-% data = data(1:data_limit, :);
-% Date = Date(1:data_limit, 1);
-% 
-% Ym   = data(13:end, 1:3);
-% Date = Date(13:end, 1);
+global data_limit name_results;
+
+T = readtable(fullfile(Base_Dir,'data_model.csv'), ...
+              'ReadVariableNames', false, 'Delimiter', ',');
+
+DateStr = string(T{:,1});
+X       = T{:,2:4};       
+
+y = double(extractBefore(DateStr,'q'));
+q = double(extractAfter (DateStr,'q'));
+Date = [datenum(datetime(y, q*3, 1))];  % [datenum] 
+
+X = data(1:data_limit, :);
+data = data(1:data_limit, :);
+Date = Date(1:data_limit, 1);
+
+Ym   = data(13:end, 1:3);
+Date = Date(13:end, 1);
 
 %__________________________________________________________________________
 % Model
