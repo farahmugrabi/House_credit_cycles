@@ -1,8 +1,6 @@
 ## By Farah Mugrabi
 #Instructions:
 #Follow @ to select options
-#Choose tolerance level: yoy/qoq drop beyond this number triggers thr_flag
-#Choose yoy or qoq drop
 
 library(tidyverse)
 library(readr)
