@@ -31,7 +31,7 @@ If you use this code, please cite both the GitHub repository and the related art
 - Code tested under **R version 4.5.1 (2025-06-13 ucrt)**.  
 - Code tested under  **MATLAB R2024b**.  
 - MATLAB tools: **Optimization Toolbox**
-- Please install the required R packages: install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra","vars","urca","mnormt","tseriesChaos","tsDyn","bvartools","tidyverse","readr","readxl","writexl","data.table","xlsx","tseries","mFilter","ggpubr","countrycode","hpfilter","pROC","qpcR","janitor","fbroc","ipred","lava","recipes","caret","gridExtra"))
+- Please install the required R packages: install.packages(c("dplyr","lubridate","DisaggregateTS","zoo","csodata","ggplot2","ecb","openxlsx","stringr","RJDemetra","vars","urca","mnormt","tseriesChaos","tsDyn","bvartools","tidyverse","readr","readxl","writexl","data.table","xlsx","tseries","mFilter","ggpubr","countrycode","hpfilter","pROC","qpcR","janitor","fbroc","ipred","lava","recipes","caret","gridExtra","mvtnorm","MASS","car","matrixcalc","viridis","ggridges","LaplacesDemon","tidyr","forecast"))
 
 # 📂 Download & Structure  
 Please download the following folders and scripts. The files and directories are the following:
