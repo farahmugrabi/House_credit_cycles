@@ -60,8 +60,9 @@ Please download the following folders and scripts. The files and directories are
 
 # ⚙️ Instructions:
 1. Download the full folder, do not change the location of the files or names.
-2. Follow @ to locate configurable options.
-3. Run ▶️ the scripts in the following order:
+2. C.Properties/Crisis_events/0.Crisis_indicator.xlsx needs to be updated manually, set dummy = 1 if any current systemic crisis occurs.
+3. Follow @ to locate configurable options.
+4. Run ▶️ the scripts in the following order:
   - B.Data/0.Data.R
   - A.Main_Code/GF3_S23_US_FIX_DYN_pars
   - C.Properties/C1.Bank_crisis.R
@@ -71,3 +72,4 @@ Please download the following folders and scripts. The files and directories are
 - Benchmark results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_main.xlsx.
 - One side results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_oneside.xlsx, this is used for real time and early warning properties.
 - There, Pseudo Real Time estimates section is commented. It is set to generate estimates recursively from quarter 100 to 197, this can be change in Master_Recursive.m, results are store in A.Main_Code/Outcome/Results_n__.xlsx.
+- O’Brien and Velasco estimates are obtained from the CBI, with the last available observation being 2024 Q4. If no current data are available, request the series or comment out the indicated lines in code C.2 Properties.R. The early warning assessment will be carried out up to the last date for which data are available for this model.
