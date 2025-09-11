@@ -1,8 +1,7 @@
 #Instructions
 #Follow @ to find the options
-#Run the code twice: one with oneside_estimate= T and the other time with oneside_estimate=F
-#Select oneside_estimate= True for the early warning and real time plots and False for the cycle plots. We base the early warning properties assessment on one sided filters
-#Update C_Properties\1.Crisis_events\0.Crisis_indicator.xlsx. if any new systemic crisis (last obs 2024q4)
+#Update C_Properties\1.Crisis_events\0.Crisis_indicator.xlsx. if any new systemic crisis (last obs 2025q2)
+#Comment/delete the lines where this message is indicated when: "no current updates available from OBrien_Velasco estimates"
 
 #Libraries
 library(vars)
@@ -17,7 +16,6 @@ library(readxl)
 library(writexl)
 library(data.table)
 library(zoo)
-library(xlsx)
 library(tseries)
 library(mFilter)
 library(ggpubr)
@@ -51,6 +49,7 @@ dir.create(file.path(base_path, "D_Results", "Plots", "Properties"), recursive =
 dir.create(file.path(base_path, "D_Results", "Plots","Properties", "Real_Time"), recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(base_path, "D_Results", "Plots","Properties", "VECM"), recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(base_path, "D_Results", "Plots","Properties", "Early_warning"), recursive = TRUE, showWarnings = FALSE)
+dir.create(file.path(base_path,"D_Results", "Plots",  "Main_Results"), recursive = TRUE, showWarnings = FALSE)
 setwd(path)
 getwd()
 
@@ -95,7 +94,7 @@ HP_Results_list_oneside<- lapply(varpass, hp_function)
 HP_Results_oneside<- left_join(HP_Results_list_oneside[[1]], HP_Results_list_oneside[[2]])
 HP_Results_oneside<- left_join(HP_Results_oneside, HP_Results_list_oneside[[3]])
 
-#Two side filter
+#Full sample filter
 hp_function_ts <- function(s){
   hp <- mFilter::hpfilter(as.data.frame(data)[, var[s]], type = "lambda", freq = 400000)
   out <- cbind(data[, c("Date", var[s])], hp$trend, hp$cycle)
@@ -116,14 +115,23 @@ openxlsx::saveWorkbook(wb, paste0(base_path,"/D_Results/Alternative_estimates/ho
 HP_credit <- merge.data.frame(HP_TS_Results[, c("Date", "hp_cycle_NC")],
                               HP_Results_list_oneside[[2]][, c("Date", "hp_cycle_NC")],
                               by = "Date")
-colnames(HP_credit) <- c("Date", "HP_NC_twosided", "HP_NC_onesided")
-HP_credit$Diff <- HP_credit$HP_NC_twosided - HP_credit$HP_NC_onesided
+colnames(HP_credit) <- c("Date", "HP_NC_fullsample", "HP_NC_onesided")
+HP_credit$Diff <- HP_credit$HP_NC_fullsample - HP_credit$HP_NC_onesided
 
-HP_DIFF <- HP_credit[41:nrow(HP_credit), ] %>%
+benchmarkoneside<-openxlsx::read.xlsx(paste0(base_path, "/A_Main_Code/Outcome/Results_oneside20.xlsx"), colNames = F)
+first_date_oneside<- seq(HP_TS_Results$Date %>% first(.), by="quarter", length.out=(13+3)) %>% last(.) #see A_Main_Code> GF3_S23_US_FIX_DYN_pars, Cycles_t.C20, starting period of estimates is 23
+last_dateoneside<- seq(first_date_oneside, by="quarter", length.out=length(benchmarkoneside[,1])) %>% last(.)
+start_date<- HP_credit[1:nrow(HP_credit), 1] %>% first()
+HP_DIFF <- HP_credit[1:nrow(HP_credit), ]
+HP_DIFF$HP_NC_onesided[1:40] <- rep(NA_real_, 40)
+HP_DIFF<- HP_DIFF %>% 
+  filter(Date<=last_dateoneside) %>%
+  filter(Date>=first_date_oneside) %>% 
   mutate(Date = as.yearqtr(Date)) %>%
-  pivot_longer(cols = c("HP_NC_twosided", "HP_NC_onesided"), values_to = "value", names_to = "variable") %>%
+  pivot_longer(cols = c("HP_NC_fullsample", "HP_NC_onesided"), values_to = "value", names_to = "variable") %>%
   ggplot() +
-  geom_line(aes(x = Date, y = value, colour = variable)) +
+  geom_line(aes(x = Date, y = value, colour = variable), size=1.5) +
+  scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_dateoneside),as.yearqtr(start_date), by=-5)))+
   labs(x = "Quarter", y = "", title = "") +
   theme_classic() +
   scale_y_continuous("National Credit cycle") +
@@ -131,27 +139,30 @@ HP_DIFF <- HP_credit[41:nrow(HP_credit), ] %>%
   guides(fill = guide_legend(title = "")) +
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype = "dotted") +
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text = element_text(size = 40),
-        axis.title = element_text(size = 40),
-        legend.text = element_text(size = 40))
-
-sd(HP_credit$Diff, na.rm = TRUE)
-sd(HP_credit$Diff, na.rm = TRUE) / sd(HP_credit$HP_NC_onesided, na.rm = TRUE)
-ggsave(paste0(path_plots, "/Real_time/HP_NC_onevstwo_sides.pdf"), HP_DIFF, height = 20, width = 25)
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text = element_text(size = 50),
+        axis.title = element_text(size = 50),
+        legend.text = element_text(size = 50))
+ggsave(paste0(path_plots, "/Real_time/HP_NC_onevsfullsample.pdf"), HP_DIFF, height = 20, width = 25)
 
 # Real time properties: RPP
 HP_RPP <- merge.data.frame(HP_TS_Results[, c("Date", "hp_cycle_RPP")],
                            HP_Results_list_oneside[[3]][, c("Date", "hp_cycle_RPP")],
                            by = "Date")
-colnames(HP_RPP) <- c("Date", "HP_RPP_twosided", "HP_RPP_onesided")
-HP_RPP$Diff <- HP_RPP$HP_RPP_twosided - HP_RPP$HP_RPP_onesided
-
-HP_DIFF_RPP <- HP_RPP[41:nrow(HP_RPP), ] %>%
+colnames(HP_RPP) <- c("Date", "HP_RPP_fullsample", "HP_RPP_onesided")
+HP_RPP$Diff <- HP_RPP$HP_RPP_fullsample - HP_RPP$HP_RPP_onesided
+start_date<- HP_RPP[1:nrow(HP_RPP), 1] %>% first()
+HP_DIFF_RPP <- HP_RPP[1:nrow(HP_RPP), ]
+HP_DIFF_RPP$HP_RPP_onesided[1:40]<- rep(NA_real_, 40)
+HP_DIFF_RPP <- HP_DIFF_RPP %>% 
+  filter(Date>=first_date_oneside) %>% 
+  filter(Date<=last_dateoneside) %>% 
   mutate(Date = as.yearqtr(Date)) %>%
-  pivot_longer(cols = c("HP_RPP_twosided", "HP_RPP_onesided"), values_to = "value", names_to = "variable") %>%
+  pivot_longer(cols = c("HP_RPP_fullsample", "HP_RPP_onesided"), values_to = "value", names_to = "variable") %>%
   ggplot() +
-  geom_line(aes(x = Date, y = value, colour = variable)) +
+  geom_line(aes(x = Date, y = value, colour = variable), size=1.5) +
+  scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_dateoneside),as.yearqtr(start_date), by=-5)))+
   labs(x = "Quarter", y = "", title = "") +
   theme_classic() +
   scale_y_continuous("House Prices cycle") +
@@ -159,22 +170,12 @@ HP_DIFF_RPP <- HP_RPP[41:nrow(HP_RPP), ] %>%
   guides(fill = guide_legend(title = "")) +
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype = "dotted") +
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text = element_text(size = 40),
-        axis.title = element_text(size = 40),
-        legend.text = element_text(size = 40))
-
-sd(HP_RPP$Diff, na.rm = TRUE)
-sd(HP_RPP$Diff, na.rm = TRUE) / sd(HP_RPP$HP_RPP_onesided, na.rm = TRUE)
-ggsave(paste0(path_plots, "/Real_time/HP_RPP_onevstwo_sides.pdf"), HP_DIFF_RPP, height = 20, width = 25)
-
-cor(HP_RPP$HP_RPP_twosided, HP_RPP$HP_RPP_onesided)
-cor(HP_credit$HP_NC_twosided, HP_credit$HP_NC_onesided)
-
-max(HP_RPP$Diff, na.rm = TRUE)
-max(HP_credit$Diff, na.rm = TRUE)
-sqrt(sum(HP_RPP$Diff^2, na.rm = TRUE))
-sqrt(sum(HP_credit$Diff^2, na.rm = TRUE))
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text = element_text(size = 50),
+        axis.title = element_text(size = 50),
+        legend.text = element_text(size = 50))
+ggsave(paste0(path_plots, "/Real_time/HP_RPP_onevsfullsample.pdf"), HP_DIFF_RPP, height = 20, width = 25)
 
 #Christiano-Fitzgerald----------------------------
 minperiod<-c(8,32,32)
@@ -212,7 +213,7 @@ CF_Results_list_oneside<- lapply(varpass, CF_function)
 CF_Results_oneside<- left_join(CF_Results_list_oneside[[1]], CF_Results_list_oneside[[2]])
 CF_Results_oneside<- left_join(CF_Results_oneside, CF_Results_list_oneside[[3]])
 
-#Two sided filter
+#Full sample filter
 cf_function<- function(s){
   cf_filter<- cffilter(data[,var[s]],pl=minperiod[s],pu=maxperiod[s],root=TRUE,drift=TRUE, 
            type=c("asymmetric"), #other options: "symmetric","fixed","baxter-king","trigonometric" #see page 9 ECB Occasional paper real anf financial cycles in EU countries: stylised facts and modelling implications
@@ -234,17 +235,22 @@ openxlsx::addWorksheet(wb,'CF')
 openxlsx::writeData(wb, sheet = 'CF', data.frame(CF_Results))
 openxlsx::saveWorkbook(wb, paste0(base_path,"/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results.xlsx"), overwrite = TRUE)
 
-#Real time properties: Chirstiano Fitzegarld-------------------------------------
-#Plot: One side (OS) vs two sided
+#Real time properties: Chirstiano-Fitzegarld-------------------------------------
+#Plot: One side (OS) vs Full sample
 CF_credit<- merge.data.frame(CF_Results[, c('Date', "cf_cycle_NC")], CF_Results_list_oneside[[2]][, c('Date', "cf_cycle_NC")], by='Date')
-colnames(CF_credit)<- c('Date', 'CF_NC_twosided', 'CF_NC_onesided')
-CF_credit$Diff<- CF_credit$CF_NC_twosided-CF_credit$CF_NC_onesided
-
-CF_DIFF<- CF_credit[41:length(CF_credit[,1]),] %>%   
+colnames(CF_credit)<- c('Date', 'CF_NC_fullsample', 'CF_NC_onesided')
+CF_credit$Diff<- CF_credit$CF_NC_fullsample-CF_credit$CF_NC_onesided
+start_date<- CF_credit[1:length(CF_credit[,1]),1] %>% first()
+CF_DIFF<- CF_credit[1:length(CF_credit[,1]),]
+CF_DIFF$CF_NC_onesided[1:40]<-rep(NA_real_, 40)
+CF_DIFF<- CF_DIFF %>%
+  filter(Date>=first_date_oneside) %>% 
+  filter(Date<=last_dateoneside) %>% 
   mutate(Date= as.yearqtr(Date)) %>% 
-  pivot_longer(cols = c('CF_NC_twosided', 'CF_NC_onesided'), values_to = "value", names_to = 'variable') %>% 
+  pivot_longer(cols = c('CF_NC_fullsample', 'CF_NC_onesided'), values_to = "value", names_to = 'variable') %>% 
   ggplot()+ 
-  geom_line(aes(x=Date, y=value, colour = variable)) +
+  geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
+  scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_dateoneside),as.yearqtr(start_date), by=-5)))+
   labs(x = "Quarter",y = "", title = "")+
   theme_classic() +
   scale_y_continuous("National Credit cycle")+
@@ -252,24 +258,27 @@ CF_DIFF<- CF_credit[41:length(CF_credit[,1]),] %>%
   guides(fill=guide_legend(title=""))+
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
-sd(CF_credit$Diff, na.rm = T)
-sd(CF_credit$Diff, na.rm = T)/sd(CF_credit$CF_NC_onesided, na.rm = T)
-
-ggsave(paste0(path_plots,  "/Real_time/CF_NC_onevstwo_sides.pdf"), CF_DIFF, height = 20, width = 25)
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(path_plots,  "/Real_time/CF_NC_onevsfullsample.pdf"), CF_DIFF, height = 20, width = 25)
 
 CF_RPP<- merge.data.frame(CF_Results[, c('Date', "cf_cycle_RPP")], CF_Results_list_oneside[[3]][, c('Date', "cf_cycle_RPP")], by='Date')
-colnames(CF_RPP)<- c('Date', 'CF_RPP_twosided', 'CF_RPP_onesided')
-CF_RPP$Diff<- CF_RPP$CF_RPP_twosided-CF_RPP$CF_RPP_onesided
-
-CF_DIFF_RPP<- CF_RPP[41:length(CF_RPP[,1]),] %>%   
+colnames(CF_RPP)<- c('Date', 'CF_RPP_fullsample', 'CF_RPP_onesided')
+CF_RPP$Diff<- CF_RPP$CF_RPP_fullsample-CF_RPP$CF_RPP_onesided
+start_date<- CF_RPP[1:length(CF_RPP[,1]),1] %>% first()
+CF_DIFF_RPP<- CF_RPP[1:length(CF_RPP[,1]),] 
+CF_DIFF_RPP$CF_RPP_onesided[1:40]<- rep(NA_real_, 40)
+CF_DIFF_RPP<- CF_DIFF_RPP %>%     
+  filter(Date>=first_date_oneside) %>% 
+  filter(Date<=last_dateoneside) %>% 
   mutate(Date= as.yearqtr(Date)) %>% 
-  pivot_longer(cols = c('CF_RPP_twosided', 'CF_RPP_onesided'), values_to = "value", names_to = 'variable') %>% 
+  pivot_longer(cols = c('CF_RPP_fullsample', 'CF_RPP_onesided'), values_to = "value", names_to = 'variable') %>% 
   ggplot()+ 
-  geom_line(aes(x=Date, y=value, colour = variable)) +
+  geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
+  scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_dateoneside),as.yearqtr(start_date), by=-5)))+
   labs(x = "Quarter",y = "", title = "")+
   theme_classic() +
   scale_y_continuous("House Prices cycle")+
@@ -277,22 +286,12 @@ CF_DIFF_RPP<- CF_RPP[41:length(CF_RPP[,1]),] %>%
   guides(fill=guide_legend(title=""))+
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
-
-sd(CF_RPP$Diff, na.rm = T)
-sd(CF_RPP$Diff, na.rm = T)/sd(CF_RPP$CF_RPP_onesided, na.rm = T)
-ggsave(paste0(path_plots,  "/Real_time/CF_RPP_onevstwo_sides.pdf"), CF_DIFF_RPP, height = 20, width = 25)
-
-cor(CF_RPP$CF_RPP_twosided, CF_RPP$CF_RPP_onesided)
-cor(CF_credit$CF_NC_onesided, CF_credit$CF_NC_onesided)
-
-max(CF_RPP$Diff)
-max(CF_credit$Diff)
-sqrt(sum(CF_RPP$Diff^2, na.rm = T))
-sqrt(sum(CF_credit$Diff^2, na.rm = T))
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(path_plots,  "/Real_time/CF_RPP_onevsfullsample.pdf"), CF_DIFF_RPP, height = 20, width = 25)
 
 #Plot: Pseudo real time (nd: new data points)
 start_date<- as.Date("2021-10-01")
@@ -330,87 +329,26 @@ for (p in 1:length(dates)){
   openxlsx::writeData(wb, sheet = name[p], data.frame(CF_nd_results[[p]]))}
 openxlsx::saveWorkbook(wb, paste0(base_path,"/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results_nd.xlsx"), overwrite = TRUE)
 
-#A.2-VECM-----------------------------------------------------------------------
+#A.2-VECM-----------------------------------------------------------------------#Johansen Test for Cointegration >  https://www.r-bloggers.com/2021/12/vector-error-correction-model-vecm-using-r/ #the maximum eigenvalue test : H0 : There are r cointegrating vectors // H1 : There are r + 1 cointegrating vectors
 #Loan rates data----------------------------------
-names_loan_rates_old<-read.csv(paste0(base_path, "/B_Data/Raw_data/Loan_Rates//", "b.1.2.csv"), header = F)[1,] # I am not sure if in the future the CBI will change the order/names of the variables, I suggest we always compare the new dowloaded data with the names found at the moment we did this code
-loan_rates<- read.csv("https://opendata.centralbank.ie/dataset/4ba390e9-c0de-4da3-a7e2-e47acdaa21ce/resource/120a26a9-acb6-473e-9b9a-469f9b0037eb/download/b.1.2.csv", header = F) 
-names_loan_rates<- loan_rates[1,]
-names_ok<- unique(as.character(names_loan_rates==names_loan_rates_old))
-ifelse(names_ok=='TRUE', "Ok", "Download this manually")#The series we want to download are Loans to households, overdrafts, interest rate (%) =position 2, and Loans to non-financial corporations, overdrafts, interest rate (%) =position 9
-HH_loan_rates<-loan_rates %>%
-  slice(-1) %>%
-  dplyr::select("V1", 'V5') %>%
-  rename(Date=V1, HH_loan_rates=V5) %>%
-  mutate(Date=as.Date(Date,format = "%d/%m/%Y")) %>% 
-  mutate(HH_loan_rates=as.numeric(HH_loan_rates)) %>% 
-  mutate(Date= ceiling_date(Date, unit = "month")) %>% 
-  as.data.frame()
-
-#Source: MFD: Variable_Mortgage_Rates.xlsx - Column A: Mortgage Rates - All Mortgage Lenders (see note 3) Midpoint i.e. Average of lowest and highest rates
-loan_rates_old<- read_xlsx(paste0(base_path, "/B_Data/Raw_data/", "Data_pre.xlsx"), sheet = 'Monthly')[,c(1,2)] 
-loan_rates_old<- loan_rates_old %>% 
-  mutate(Date=as.Date(Date,format = "%d/%m/%Y")) %>% 
-  mutate(HH_loan_rates=as.numeric(HH_loan_rates)) %>% 
-  mutate(Date= ceiling_date(Date, unit = "month")) %>% 
-  as.data.frame() %>% 
-  mutate(HH_loan_rates= as.numeric(HH_loan_rates))
-
-compare_old<- loan_rates_old %>% 
-  filter(Date>="2003-02-01") 
-compare_new<- HH_loan_rates %>% 
-  filter(Date<="2005-08-01") 
-level<- mean(compare_old[,2]-compare_new[,2])
-
-loan_rates_old<- loan_rates_old %>% 
-  mutate(HH_loan_rates=HH_loan_rates+level) %>% 
-  filter(Date<"2003-02-01") %>% 
-  filter(Date>="1975-10-01")
-
-HH_loan_rates<- rbind(loan_rates_old , HH_loan_rates) %>% 
-  mutate(Date=as.Date(as.yearqtr(Date)))%>% 
-  group_by(Date) %>%
-  mutate(HH_loan_rates=mean(HH_loan_rates, na.rm = T)) %>% 
-  mutate(HH_loan_rates=log(HH_loan_rates))
-str(HH_loan_rates)
-ggplot(HH_loan_rates, aes(x=Date, y=HH_loan_rates))+geom_line()+geom_vline(xintercept = as.Date("2003-02-01"))
-
-CPI_all<- cso_get_data('CPM01', pivot_format = "tall", use_dates = TRUE, use_factors = FALSE, cache = FALSE) %>% 
-  filter(Statistic=='Consumer Price Index (Base Dec 2016=100)')%>%
-  filter(Commodity.Group== 'All items') %>% 
-  rename(Date=Month) %>% 
-  mutate(Date = as.Date(Date)) %>%
-  dplyr::select(Date,value) %>% 
-  rename(CPI_all=value) %>% 
-  as.data.frame()
-
-CPI_all<- CPI_all %>% 
-  mutate(Date = as.Date(Date)) %>% 
-  mutate(Date =as.Date(as.yearqtr(Date))) %>% 
-  group_by(Date) %>%
-  mutate(CPI_all=mean(CPI_all, na.rm = T)) %>% #in the original file the take the value of the last month of the quarter, here we take the average across the quarter 
+HH_loan_rates <- readxl::read_excel(paste0(base_path,'/B_Data/HH_loan_rates.xlsx'))
+HHq <- HH_loan_rates %>%
+  mutate(yq = paste0(year(Date), "Q", quarter(Date))) %>%
+  group_by(yq) %>%
+  summarize(
+    Date = max(Date),                        
+    HH_loan_rates_r = mean(HH_loan_rates_r, na.rm = TRUE) ) %>%
   ungroup() %>% 
-  dplyr::select(Date, CPI_all) %>% 
-  distinct()%>% 
-  as.data.frame() %>% 
-  mutate(CPI= CPI_all/last(CPI_all))# re-based to 100 LAST quarter, so variables are expressed in contemporanous values
+  mutate(Date=as.Date(Date)) %>% 
+  dplyr::select(c('Date','HH_loan_rates_r'))
 
-HH_loan_rates<- merge.data.frame(HH_loan_rates, CPI_all, by='Date')
-HH_loan_rates<- HH_loan_rates %>% 
-  mutate(HH_loan_rates_r= HH_loan_rates-log(CPI))
-write.xlsx(HH_loan_rates, file = paste0(base_path,'/B_Data/HH_loan_rates.xlsx'))
-
-pHH_loan_rates_r<- ggplot(HH_loan_rates, aes(x=Date, y=HH_loan_rates_r))+geom_line()+geom_vline(xintercept = as.Date("2003-02-01"))
-pHH_loan_rates<- ggplot(HH_loan_rates, aes(x=Date, y=HH_loan_rates))+geom_line()+geom_vline(xintercept = as.Date("2003-02-01"))
-ggsave(paste0(base_path,"/D_Results/Plots/Data/","pHH_loan_rates_r.pdf"), pHH_loan_rates_r, height = 20, width = 25)
-ggsave(paste0(base_path,"/D_Results/Plots/Data/", "pHH_loan_rates.pdf"), pHH_loan_rates, height = 20, width = 25)
-
-#Johansen Test for Cointegration >  https://www.r-bloggers.com/2021/12/vector-error-correction-model-vecm-using-r/ #the maximum eigenvalue test : H0 : There are r cointegrating vectors // H1 : There are r + 1 cointegrating vectors
-data_vec<- merge.data.frame(data,HH_loan_rates[, c('Date', 'HH_loan_rates_r')], by='Date')  #Exactly as Galan and Mencia
+data_vec<- merge.data.frame(data,HHq, by='Date')  #As in Galan and Mencia (2018)
 colnames(data_vec)<- c("Date", "GNI", "NC", "RPP", "HH_loan_rates")
 dummy<- rep(0, length(data_vec$Date))
 dummy[which(data_vec$Date>="2008-01-01" & data_vec$Date<="2012-10-01" )]<- rep(1,length(which(data_vec$Date>="2008-01-01" & data_vec$Date<="2012-10-01" ))) #Laeven and Valencia (2020) - Systemic Banking Crisis 
 dummy[which(data_vec$Date>="2008-01-01" & data_vec$Date<="2009-01-01" )]<- rep(1,length(which(data_vec$Date>="2008-01-01" & data_vec$Date<="2009-01-01" ))) #Laeven and Valencia (2020) - Systemic Banking Crisis 
 data_vec<- data_vec %>% na.omit(.)
+
 #Estimation VECM----------------------------------
 for (md in c("GM","Cust")){#GM: Galan and Mencia 2018 specification, Cust: customized
 if(md=='GM'){
@@ -418,25 +356,26 @@ if(md=='GM'){
   coint_ca.jo <- ca.jo(data_vec[,-1], ecdet = "const", type  = "eigen", K = 3, spec = "transitory", season = 4)#Exactly as Galan and Mencia
   vecm<- VECM(data_vec[,c('GNI', 'NC', 'RPP', 'HH_loan_rates')], estim="ML", LRinclude='const', lag=4, r=2)
   beta_vec <- coint_ca.jo@V[,1] # Eigenvectors, normalised to first column: (These are the cointegration relations)
+  #beta_vec<- t(coefB(vecm)) to extract eigen values form cointegration, other option
   # Cointegrating vector (manually retrieved or from summary(coint_ca.jo))> # GDP - β11 * National Credit - β12 * RPP = μ
+  gm_coint<-summary(coint_ca.jo) #Check order cointegration:test statistic exceeds the 1, 5 and 10% critical values?, there is at least one cointegration. 
+  gm_vec<- summary(vecm) 
   residuals<- data.frame(GNI= coint_ca.jo@Z0[,1],NC =coint_ca.jo@Z0[,2] , RPP =coint_ca.jo@Z0[,3],HH_loan_rates =coint_ca.jo@Z0[,4])
   namecols<- names(data_vec)[-1]
   lengthdata<- length(data_vec[,1])
   lengthcoint<- length(residuals[,1])
   data_vec2<- data_vec
   data_vec2$coint<- beta_vec[5]+beta_vec[1]*data_vec[,'GNI']+beta_vec[2]*data_vec[,'NC']+beta_vec[3]*data_vec[,'RPP']+beta_vec[4]*data_vec[,'HH_loan_rates']
-    }
+      }
   else{
   name= 'cust'
-  coint_ca.jo <- ca.jo(data_vec[,c("GNI", "NC", 'RPP')], ecdet = "const", type  = "eigen", K = 3, spec = "transitory", season = 4)#Our own, put dumvar = dummy if you want a dummy back
+  coint_ca.jo <- ca.jo(data_vec[,c("GNI", "NC", 'RPP')], ecdet = "const", type  = "eigen", K = 3, spec = "transitory", season = 4)#@option: put dumvar = dummy if you want a dummy
   vecm<- VECM(data_vec[,c('GNI', 'NC', 'RPP')], estim="ML", LRinclude='none', lag=3, r=1)
-  summary(coint_ca.jo) #Check order cointegration:test statistic exceeds the 1, 5 and 10% critical values?, there is at least one cointegration. In the second r = 1 null hypothesis, since the test statistic  19.19 doesnt exceed the any critical values, the second hypothesis not rejected
-  coint_ca.jo@teststat
-  summary(vecm) # beta_vec<- t(coefB(vecm)) to extract eigen values form cointegration
-  
   beta_vec <- coint_ca.jo@V[,1] # Eigenvectors, normalised to first column: (These are the cointegration relations)
-  # vecm<- VECM(data_vec[,c('GNI', 'NC', 'RPP')], estim="ML", LRinclude='none', lag=3, r=1, beta=c(1,-1,-1.229265)) #RESTRICTION
+  # vecm<- VECM(data_vec[,c('GNI', 'NC', 'RPP')], estim="ML", LRinclude='none', lag=3, r=1, beta=c(1,-1,-1.229265)) #Restriction as in Galan and Mencia (2018) 
   # beta_vec <- c(1,-1, -1.229265) # Restriction: (These are the cointegration relations)
+  cust_coint<-summary(coint_ca.jo) #Check order cointegration:test statistic exceeds the 1, 5 and 10% critical values?, there is at least one cointegration. 
+  cust_vec<-summary(vecm) 
   residuals<- data.frame(GNI= coint_ca.jo@Z0[,1],NC =coint_ca.jo@Z0[,2] , RPP =coint_ca.jo@Z0[,3])
   namecols<- names(data_vec)[-1]
   lengthdata<- length(data_vec[,1])
@@ -449,7 +388,7 @@ coint<- data_vec2 %>%
   mutate(Date= as.yearqtr(Date)) %>% 
   pivot_longer(cols='coint' ,names_to = "variable", values_to = "value") %>% 
   ggplot()+ 
-  geom_line(aes(x=Date, y=value, colour = variable)) +
+  geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
   theme_classic() +
   labs(x = "Quarter",y = "log", title = "")+
   scale_color_manual(values = cbi_palette[c(1)], name='')+
@@ -457,10 +396,11 @@ coint<- data_vec2 %>%
   guides(fill=guide_legend(title=""))+
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(path_plots,"/VECM/coint_",name, '.pdf'), coint, height = 20, width = 25)
 
 data_vec2<- data_vec
@@ -481,23 +421,24 @@ plot_main<- function(s){
     mutate(Date= as.yearqtr(Date)) %>% 
     pivot_longer(cols=c(data, ect) ,names_to = "variable", values_to = "value") %>% 
     ggplot()+ 
-    geom_line(aes(x=Date, y=value, colour = variable))+
+    geom_line(aes(x=Date, y=value, colour = variable), size=1.5)+
     theme_classic() +
     labs(x = "Quarter",y = "log", title = s)+
     scale_color_manual(values = cbi_palette[c(1,4)], name='')+
     scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last(data_vec2$Date)),as.yearqtr(first(data_vec2$Date)), by=-12)))+
     guides(fill=guide_legend(title=""))+
     theme(legend.position = "bottom",
-          plot.title = element_text(size = 40),
-          axis.text=element_text(size=40),
-          axis.title=element_text(size=40),
-          legend.text =element_text(size=40))
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.title = element_text(size = 50),
+          axis.text=element_text(size=50),
+          axis.title=element_text(size=50),
+          legend.text =element_text(size=50))
   
   c<- data_vec2 %>%
     mutate(Date= as.yearqtr(Date)) %>% 
     pivot_longer(cols='gap' ,names_to = "variable", values_to = "value") %>% 
     ggplot()+ 
-    geom_line(aes(x=Date, y=value, colour = variable)) +
+    geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
     theme_classic() +
     labs(x = "Quarter",y = "log", title = "")+
     scale_color_manual(values = cbi_palette[c(8)], name='')+
@@ -505,10 +446,11 @@ plot_main<- function(s){
     guides(fill=guide_legend(title=""))+
     geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
     theme(legend.position = "bottom",
-          plot.title = element_text(size = 40),
-          axis.text=element_text(size=40),
-          axis.title=element_text(size=40),
-          legend.text =element_text(size=40))
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.title = element_text(size = 50),
+          axis.text=element_text(size=50),
+          axis.title=element_text(size=50),
+          legend.text =element_text(size=50))
   
   plot_d_t_c<- grid.arrange(dt, c, nrow = 1)
   
@@ -537,7 +479,7 @@ vec_NC<- merge.data.frame(VEC_GM_NC, VEC_cust_NC, by='Date')
 
 #B-Early warning----------------------------------------------------------------
 #B.1 Bring all estimations------------------------------------------------------
-#Two-sided data frame
+#Full sample data frame
 data_cycles1<-openxlsx::read.xlsx(paste0(base_path, "/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results.xlsx")) %>%
   mutate(Date=excel_numeric_to_date(Date)) %>% 
   dplyr::select(c("Date","cf_cycle_GNI",	"cf_cycle_NC","cf_cycle_RPP"))
@@ -559,21 +501,21 @@ first_date_benchmark<- seq(data_cycles1$Date[1], by="quarter", length.out=13) %>
 data_cycles4$Date<- seq(first_date_benchmark, by="quarter", length.out=length(data_cycles4[,1]))
 
 data_cycles<- merge.data.frame(data_cycles1,data_cycles2, by = 'Date')
-data_cycles<- merge.data.frame(data_cycles,data_cycles3, by = 'Date')
 data_cycles<- merge.data.frame(data_cycles,data_cycles4, by = 'Date')
+data_cycles<- merge.data.frame(data_cycles,data_cycles3, by = 'Date', all.x = T)#@Comment this if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
 
 colnames(data_cycles)
 data_cycles<- data_cycles %>% 
-  dplyr::select(c("Date",'cf_cycle_NC', 'hp_cycle_NC', 'benchmark_cycle_NC', "ov_cycle_NC",
+  dplyr::select(c("Date",'cf_cycle_NC', 'hp_cycle_NC', 'benchmark_cycle_NC', "ov_cycle_NC", #@Delete ov_cycle_NC if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
                 'cf_cycle_RPP', 'hp_cycle_RPP', 'benchmark_cycle_RPP', 
                 'cf_cycle_GNI', 'hp_cycle_GNI', 'benchmark_cycle_GNI')) %>% 
-  rename(CF_NC=cf_cycle_NC, HP_NC=hp_cycle_NC,Benchmark_NC=benchmark_cycle_NC, OV_NC=ov_cycle_NC) %>%
+  rename(CF_NC=cf_cycle_NC, HP_NC=hp_cycle_NC,Benchmark_NC=benchmark_cycle_NC, OV_NC=ov_cycle_NC) %>% # @Delete ov_cycle_NC if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
   rename(CF_RPP=cf_cycle_RPP, HP_RPP=hp_cycle_RPP,Benchmark_RPP=benchmark_cycle_RPP) %>% 
   rename(CF_GNI=cf_cycle_GNI, HP_GNI=hp_cycle_GNI,Benchmark_GNI=benchmark_cycle_GNI) %>%
   mutate(Benchmark_NC_prob=(Benchmark_NC-min(Benchmark_NC, na.rm = T))/max(Benchmark_NC-min(Benchmark_NC, na.rm = T), na.rm = T),
          HP_NC_prob=(HP_NC-min(HP_NC, na.rm = T))/max(HP_NC-min(HP_NC, na.rm = T), na.rm = T),
          CF_NC_prob=(CF_NC-min(CF_NC, na.rm = T))/max(CF_NC-min(CF_NC, na.rm = T), na.rm = T),
-         OV_NC_prob=(OV_NC-min(OV_NC, na.rm = T))/max(OV_NC-min(OV_NC, na.rm = T), na.rm = T)) 
+         OV_NC_prob=(OV_NC-min(OV_NC, na.rm = T))/max(OV_NC-min(OV_NC, na.rm = T), na.rm = T))  #@Delete OV_NC_prob if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
 
 data_cycles<- data_cycles %>%   
   mutate(Benchmark_RPP_prob=(Benchmark_RPP-min(Benchmark_RPP, na.rm = T))/max(Benchmark_RPP-min(Benchmark_RPP, na.rm = T), na.rm = T),
@@ -621,24 +563,22 @@ data_cycles_os<-data_cycles_os %>%
 
 #Real time properties: Benchmark-------------------------------------------------
 #One side benchmark
-data_cycles_oneside<-openxlsx::read.xlsx(paste0(base_path, "/A_Main_Code/Outcome/Results_oneside.xlsx"), colNames = F)
-first_date_oneside<- seq(first_date_benchmark, by="quarter", length.out=12) %>% last(.) #@Check first date one side, see A_Main_Code> GF3_S23_US_FIX_DYN_pars, Cycles_t.C20
-data_cycles_oneside$Date<- seq(first_date_benchmark, by="quarter", length.out=length(data_cycles_oneside[,1]))
+data_cycles_oneside<-openxlsx::read.xlsx(paste0(base_path, "/A_Main_Code/Outcome/Results_oneside20.xlsx"), colNames = F)
+first_date_oneside<- seq(first_date_benchmark, by="quarter", length.out=(4)) %>% last(.) #see A_Main_Code> GF3_S23_US_FIX_DYN_pars, Cycles_t.C20, starting period of estimates is 23
+data_cycles_oneside$Date<- seq(first_date_oneside, by="quarter", length.out=length(data_cycles_oneside[,1]))
 colnames(data_cycles_oneside)<-c("Benchmark_GNI", "Benchmark_RPP", "Benchmark_NC",'Date')
-
 data_cycles_oneside<-data_cycles_oneside %>% 
   mutate(Benchmark_NC_prob=(Benchmark_NC-min(Benchmark_NC, na.rm = T))/max(Benchmark_NC-min(Benchmark_NC, na.rm = T), na.rm = T),
          Benchmark_RPP_prob=(Benchmark_RPP-min(Benchmark_RPP, na.rm = T))/max(Benchmark_RPP-min(Benchmark_RPP, na.rm = T), na.rm = T)) %>% 
   dplyr::select(Date,Benchmark_NC, Benchmark_NC_prob, Benchmark_RPP, Benchmark_RPP_prob) %>% 
   mutate(Benchmark_comp= (0.5*Benchmark_NC-mean(Benchmark_NC, na.rm=T))/sd(Benchmark_NC, na.rm=T)+(0.5*Benchmark_RPP-mean(Benchmark_RPP, na.rm=T))/sd(Benchmark_RPP, na.rm=T)) %>% 
   mutate(Benchmark_comp_prob= (Benchmark_comp-min(Benchmark_comp, na.rm = T))/max(Benchmark_comp-min(Benchmark_comp, na.rm = T), na.rm = T))
-
 data_cycles_os<- data_cycles_os %>% 
   dplyr::select(-c(Benchmark_NC,Benchmark_NC, Benchmark_NC_prob, Benchmark_RPP, Benchmark_RPP_prob,
                    Benchmark_comp, Benchmark_comp_prob))
 data_cycles_os<- merge.data.frame(data_cycles_os,data_cycles_oneside, by='Date')
+last_date_earlywarning<-data_cycles_os$Date %>% last()
 
-#Two-sided vs One-sided benchmark-------------------------
 data_cycles_full_benchmark<-data_cycles4 %>%  
   dplyr::select(c("Date", 'benchmark_cycle_NC', 'benchmark_cycle_RPP')) %>% 
   rename(Benchmark_NC=benchmark_cycle_NC) %>%
@@ -646,65 +586,121 @@ data_cycles_full_benchmark<-data_cycles4 %>%
   mutate(Benchmark_NC_prob=(Benchmark_NC-min(Benchmark_NC, na.rm = T))/max(Benchmark_NC-min(Benchmark_NC, na.rm = T), na.rm = T)) %>% 
   mutate(Benchmark_RPP_prob=(Benchmark_RPP-min(Benchmark_RPP, na.rm = T))/max(Benchmark_RPP-min(Benchmark_RPP, na.rm = T), na.rm = T))
 
-#National credit
+#National credit plot
 diff_NC_benchmark<- merge.data.frame(data_cycles_full_benchmark[, c('Date', 'Benchmark_NC')],data_cycles_oneside[, c('Date', 'Benchmark_NC')], by='Date')
-colnames(diff_NC_benchmark)<- c("Date",'Benchmark_NC_twosided', 'Benchmark_NC_onesided')
-diff_NC_benchmark$Diff<- diff_NC_benchmark$Benchmark_NC_twosided-diff_NC_benchmark$Benchmark_NC_onesided
-
+colnames(diff_NC_benchmark)<- c("Date",'Benchmark_NC_fullsample', 'Benchmark_NC_onesided')
+diff_NC_benchmark$Diff<- diff_NC_benchmark$Benchmark_NC_fullsample-diff_NC_benchmark$Benchmark_NC_onesided
+last_date<- last(diff_NC_benchmark$Date)
+start_date<- first(diff_NC_benchmark$Date)
 Benchmark_DIFF<- diff_NC_benchmark %>%   
-  # mutate(Diff=Diff*3) %>% 
   mutate(Date= as.yearqtr(Date)) %>% 
-  pivot_longer(cols = c('Benchmark_NC_twosided', 'Benchmark_NC_onesided'), values_to = "value", names_to = 'variable') %>% 
+  pivot_longer(cols = c('Benchmark_NC_fullsample', 'Benchmark_NC_onesided'), values_to = "value", names_to = 'variable') %>% 
   ggplot()+ 
-  geom_line(aes(x=Date, y=value, colour = variable)) +
+  geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
+  scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_date),as.yearqtr(start_date), by=-5)))+
   labs(x = "Quarter",y = "", title = "")+
   theme_classic() +
   scale_y_continuous("National Credit cycle")+
   scale_color_manual(values = cbi_palette[c(1, 8,10)], name='')+
-  # scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(last(dt[,1],1), dt[1,1],by=-600)))+
   guides(fill=guide_legend(title=""))+
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
-sd(diff_NC_benchmark$Diff, na.rm = T)
-sd(diff_NC_benchmark$Diff, na.rm = T)/sd(diff_NC_benchmark$Benchmark_NC_onesided, na.rm = T)
-cor(diff_NC_benchmark$Benchmark_NC_twosided[-c(1:15)], diff_NC_benchmark$Benchmark_NC_onesided[-c(1:15)])
-max(diff_NC_benchmark$Diff, na.rm = T)
-sqrt(sum(diff_NC_benchmark$Diff^2, na.rm = T))
-ggsave(paste0(path_plots,  "/Real_time/Benchmark_NC_onevstwoside.pdf"), Benchmark_DIFF, height = 20, width = 25)
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(path_plots,  "/Real_time/Benchmark_NC_onevsfullsample.pdf"), Benchmark_DIFF, height = 20, width = 25)
 
-#House prices
+#House prices Plot
 diff_RPP_benchmark<- merge.data.frame(data_cycles_full_benchmark[, c('Date', 'Benchmark_RPP')],data_cycles_oneside[, c('Date', 'Benchmark_RPP')], by='Date')
-colnames(diff_RPP_benchmark)<- c("Date",'Benchmark_RPP_twosided', 'Benchmark_RPP_onesided')
-diff_RPP_benchmark$Diff<- diff_RPP_benchmark$Benchmark_RPP_twosided-diff_RPP_benchmark$Benchmark_RPP_onesided
-cor(diff_RPP_benchmark$Benchmark_RPP_twosided[-c(1:15)], diff_RPP_benchmark$Benchmark_RPP_onesided[-c(1:15)])
-
+colnames(diff_RPP_benchmark)<- c("Date",'Benchmark_RPP_fullsample', 'Benchmark_RPP_onesided')
+diff_RPP_benchmark$Diff<- diff_RPP_benchmark$Benchmark_RPP_fullsample-diff_RPP_benchmark$Benchmark_RPP_onesided
+last_date<- last(diff_RPP_benchmark$Date)
+start_date<- first(diff_RPP_benchmark$Date)
 Benchmark_DIFF<- diff_RPP_benchmark %>%   
-  # mutate(Diff=Diff*3) %>% 
   mutate(Date= as.yearqtr(Date)) %>% 
-  pivot_longer(cols = c('Benchmark_RPP_twosided', 'Benchmark_RPP_onesided'), values_to = "value", names_to = 'variable') %>% 
+  pivot_longer(cols = c('Benchmark_RPP_fullsample', 'Benchmark_RPP_onesided'), values_to = "value", names_to = 'variable') %>% 
   ggplot()+ 
-  geom_line(aes(x=Date, y=value, colour = variable)) +
+  geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
+  scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_date),as.yearqtr(start_date), by=-5)))+
   labs(x = "Quarter",y = "", title = "")+
   theme_classic() +
   scale_y_continuous("House Prices cycle")+
   scale_color_manual(values = cbi_palette[c(1, 8,10)], name='')+
-  # scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(last(dt[,1],1), dt[1,1],by=-600)))+
   guides(fill=guide_legend(title=""))+
   geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
-sd(diff_RPP_benchmark$Diff, na.rm = T)
-sd(diff_RPP_benchmark$Diff, na.rm = T)/sd(diff_RPP_benchmark$Benchmark_RPP_onesided, na.rm = T)
-max(diff_RPP_benchmark$Diff, na.rm = T)
-sqrt(sum(diff_RPP_benchmark$Diff^2, na.rm = T))
-ggsave(paste0(path_plots,  "/Real_time/Benchmark_RPP_onevstwoside.pdf"), Benchmark_DIFF, height = 20, width = 25)
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(path_plots,  "/Real_time/Benchmark_RPP_onevsfullsample.pdf"), Benchmark_DIFF, height = 20, width = 25)
+
+#Table One side vs full sample estimate 
+diff_NC_benchmark<- merge.data.frame(data_cycles_full_benchmark[, c('Date', 'Benchmark_NC')],data_cycles_oneside[, c('Date', 'Benchmark_NC')], by='Date')
+colnames(diff_NC_benchmark)<- c("Date",'Benchmark_NC_fullsample', 'Benchmark_NC_onesided')
+diff_NC_benchmark$Diff<- diff_NC_benchmark$Benchmark_NC_fullsample-diff_NC_benchmark$Benchmark_NC_onesided
+diff_RPP_benchmark<- merge.data.frame(data_cycles_full_benchmark[, c('Date', 'Benchmark_RPP')],data_cycles_oneside[, c('Date', 'Benchmark_RPP')], by='Date')
+colnames(diff_RPP_benchmark)<- c("Date",'Benchmark_RPP_fullsample', 'Benchmark_RPP_onesided')
+diff_RPP_benchmark$Diff<- diff_RPP_benchmark$Benchmark_RPP_fullsample-diff_RPP_benchmark$Benchmark_RPP_onesided
+
+rmse <- function(x) sqrt(mean(x^2, na.rm = TRUE))
+corr_co <- function(x, y, idx = NULL) {
+  if (!is.null(idx)) return(cor(x[idx], y[idx], use = "complete.obs"))
+  cor(x, y, use = "complete.obs")
+}
+sd_ratio <- function(diff, onesided) sd(diff, na.rm = TRUE) / sd(onesided, na.rm = TRUE)
+
+idx_bm_NC <- setdiff(seq_len(nrow(diff_NC_benchmark)), 1:15)#Exclude first 15 observations from benchmark
+idx_bm_HP <- setdiff(seq_len(nrow(diff_RPP_benchmark)), 1:15)
+
+# --- Benchmark ---
+bm_corr_nc <- corr_co(diff_NC_benchmark$Benchmark_NC_fullsample,
+                      diff_NC_benchmark$Benchmark_NC_onesided, idx = idx_bm_NC)
+bm_corr_hp <- corr_co(diff_RPP_benchmark$Benchmark_RPP_fullsample,
+                      diff_RPP_benchmark$Benchmark_RPP_onesided, idx = idx_bm_HP)
+bm_rmse_nc <- rmse(diff_NC_benchmark$Diff)*100
+bm_rmse_hp <- rmse(diff_RPP_benchmark$Diff)*100
+bm_sd_nc_ratio <- sd_ratio(diff_NC_benchmark$Diff, diff_NC_benchmark$Benchmark_NC_onesided)
+bm_sd_hp_ratio <- sd_ratio(diff_RPP_benchmark$Diff, diff_RPP_benchmark$Benchmark_RPP_onesided)
+bm_sd_nc_raw   <- sd(diff_NC_benchmark$Diff, na.rm = TRUE)
+bm_sd_hp_raw   <- sd(diff_RPP_benchmark$Diff, na.rm = TRUE)
+
+# --- CF Filter ---
+cf_corr_nc <- corr_co(CF_credit$CF_NC_fullsample, CF_credit$CF_NC_onesided)
+cf_corr_hp <- corr_co(CF_RPP$CF_RPP_fullsample, CF_RPP$CF_RPP_onesided)
+cf_rmse_nc <- rmse(CF_credit$Diff)*100
+cf_rmse_hp <- rmse(CF_RPP$Diff)*100
+cf_sd_nc_ratio <- sd_ratio(CF_credit$Diff, CF_credit$CF_NC_onesided)
+cf_sd_hp_ratio <- sd_ratio(CF_RPP$Diff, CF_RPP$CF_RPP_onesided)
+cf_sd_nc_raw   <- sd(CF_credit$Diff, na.rm = TRUE)
+cf_sd_hp_raw   <- sd(CF_RPP$Diff, na.rm = TRUE)
+
+# --- HP Filter ---
+hp_corr_nc <- corr_co(HP_credit$HP_NC_fullsample, HP_credit$HP_NC_onesided)
+hp_corr_hp <- corr_co(HP_RPP$HP_RPP_fullsample, HP_RPP$HP_RPP_onesided)
+hp_rmse_nc <- rmse(HP_credit$Diff)*100
+hp_rmse_hp <- rmse(HP_RPP$Diff)*100
+hp_sd_nc_ratio <- sd_ratio(HP_credit$Diff, HP_credit$HP_NC_onesided)
+hp_sd_hp_ratio <- sd_ratio(HP_RPP$Diff, HP_RPP$HP_RPP_onesided)
+hp_sd_nc_raw   <- sd(HP_credit$Diff, na.rm = TRUE)
+hp_sd_hp_raw   <- sd(HP_RPP$Diff, na.rm = TRUE)
+
+results_tbl <- tibble(
+  Model       = c("Benchmark", "CF Filter", "HP Filter"),
+  Corr_NC     = c(bm_corr_nc, cf_corr_nc, hp_corr_nc),
+  Corr_HP     = c(bm_corr_hp, cf_corr_hp, hp_corr_hp),
+  RMSE_NC     = c(bm_rmse_nc, cf_rmse_nc, hp_rmse_nc),
+  RMSE_HP     = c(bm_rmse_hp, cf_rmse_hp, hp_rmse_hp),
+  SDratio_NC  = c(bm_sd_nc_ratio, cf_sd_nc_ratio, hp_sd_nc_ratio),
+  SD_NC       = c(bm_sd_nc_raw,   cf_sd_nc_raw,   hp_sd_nc_raw),
+  SDratio_HP  = c(bm_sd_hp_ratio, cf_sd_hp_ratio, hp_sd_hp_ratio),
+  SD_HP       = c(bm_sd_hp_raw,   cf_sd_hp_raw,   hp_sd_hp_raw)
+) %>%
+  mutate(across(where(is.numeric), ~formatC(., format = "f", digits = 4)))
+write.xlsx(as.data.frame(results_tbl),paste0(base_path,"/D_Results/Tables/onesidevsfullsamples.xlsx"))
 
 #B.2 Crisis events--------------------------------------------------------------
 #Currency crisis:-----------
@@ -729,17 +725,17 @@ var_decomp<-as.data.frame(cbind.data.frame(data[,"Date"], data[,2], hp_trend, hp
 colnames(var_decomp)<- c('Date','FX', paste0("hp_trend_", 'FX'), paste0("hp_cycle_", 'FX'))
 var_decomp<- var_decomp %>% mutate(Date=as.yearqtr(Date,format = "%YQ%q")) 
 
-fx_trend<- ggplot(var_decomp,aes(x=Date,y= hp_trend_FX, color='Trend (HP)'))+geom_line()+geom_line(aes(y=FX, color='FX (IE/US'))+
+fx_trend<- ggplot(var_decomp,aes(x=Date,y= hp_trend_FX, color='Trend (HP)'))+geom_line(size=1.5)+geom_line(aes(y=FX, color='FX (IE/US)'), size=1.5)+
   theme_classic() +
   labs(x = "Quarter",y = "FX (IE/US)", title = '')+
   scale_color_manual(values = c("#0B5471",  "#5EC5C2" ), name="")+
   scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(last(var_decomp[,1]),first(var_decomp[,1]), by=-6)))+
   guides(fill=guide_legend(title=""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(path_plots,"/Crisis_Events/fx",".pdf"), fx_trend, height = 20, width = 25)
 
 nameworkbook<- paste0(path,"/1.Crisis_events/fx_filtered.xlsx")
@@ -749,7 +745,7 @@ openxlsx::writeData(wb, sheet = 'FX', data.frame(var_decomp))
 openxlsx::saveWorkbook(wb, paste0(path,"/1.Crisis_events/fx_filtered.xlsx"), overwrite = TRUE)
 
 #Systemic Crisis indicator----------------
-pre_crisis<- 3 #@SELECT, years
+pre_crisis<- 3 #@Select, years
 data_crisis<- list()
 
 #All sample dummy: it is the wider set, Babecky·et al. (2012)+ Laeven and Valencia (2020)+ 	FX	+Baron and Dieckelmann (2022)
@@ -776,7 +772,7 @@ plot_data<- data_crisis[[1]] %>%
 
 systemic_crisisplot<- ggplot(plot_data, aes(x=Date,y=Crisis))+
   geom_ribbon(aes(ymin=0, ymax=Crisis, fill=type), alpha=0.5)+
-  geom_text(aes(label=Reference, y=Label), vjust=1, hjust=0., size=10, angle=0, position ="identity")+
+  geom_text(aes(label=Reference, y=Label), vjust=1, hjust=0., size=9, angle=0, position ="identity")+
   guides(fill=guide_legend(title=""))+
   theme_classic() +
   labs(
@@ -785,10 +781,10 @@ systemic_crisisplot<- ggplot(plot_data, aes(x=Date,y=Crisis))+
     title = ""
   )+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))+
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))+
   scale_fill_manual(values = c('#FCAF17','#0083A0'))
 ggsave(paste0(path_plots,"/Crisis_events/systemic_crisisplot",".pdf"), systemic_crisisplot, height = 20, width = 25)
 
@@ -830,7 +826,7 @@ wb <- openxlsx::createWorkbook(nameworkbook)
 setwd(path)
 
 all_crisis_names<- c('Babecky_Baron', 'Babecky', paste0("Bank_crisis_",1:length(bank_crisis_names)))
-indicator<-c("Benchmark_NC", "HP_NC", "CF_NC", "OV_NC",
+indicator<-c("Benchmark_NC", "HP_NC", "CF_NC", "OV_NC", #@Delete OV_NC if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
              "Benchmark_RPP", "HP_RPP", "CF_RPP",
              "Benchmark_GNI", "HP_GNI", "CF_GNI",
              'VEC_cust_NC','VEC_GM_NC',
@@ -838,13 +834,13 @@ indicator<-c("Benchmark_NC", "HP_NC", "CF_NC", "OV_NC",
 indicator<-indicator[c(1:8,11:13)]#@subsample: select the indicators for which you want to obtain the metrics
 indicator_prob<-paste0(indicator,'_prob')
 
-data_cycles_os<- data_cycles_os %>% 
+data_cycles_os<- data_cycles_os %>% #@comment if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
   dplyr::select(Date, indicator_prob, indicator)
-data_cycles<- data_cycles %>% 
+data_cycles<- data_cycles %>% #@comment if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
   dplyr::select(Date, indicator_prob, indicator)
 
 for (oneside_estimate in c(F,T)){
-    
+  
     if(oneside_estimate==T){
       data_ew<-data_cycles_os
     }else{
@@ -854,9 +850,9 @@ for (oneside_estimate in c(F,T)){
     
     data_roc<- merge(data_crisis[[c]], data_ew, by='Date')
     
-    meanov=mean(data_roc$OV_NC, na.rm=T)
+    meanov=mean(data_roc$OV_NC, na.rm=T)#@comment if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
     meanovprob=mean(data_roc$OV_NC_prob, na.rm=T)
-    data_roc<-data_roc %>% 
+    data_roc<-data_roc %>% #@comment if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
       mutate(OV_NC=if_else(is.na(OV_NC),meanov, OV_NC)) %>% 
       mutate(OV_NC_prob=if_else(is.na(OV_NC_prob),meanovprob, OV_NC_prob))
   
@@ -873,12 +869,12 @@ for (oneside_estimate in c(F,T)){
       
       roc_obj <- tryCatch(
         roc(y, x, direction="<", quiet=TRUE,
-            smooth=TRUE, smooth.method="density", bw=bw.nrd0(x)*0.99),
+            smooth=TRUE, smooth.method="density", bw=bw.nrd0(x)*1),#@smooth 0.1-0.99
         error = function(e) {
           xj <- jitter(x, amount = sd(x, na.rm=TRUE)*1e-6)
           tryCatch(
             roc(y, xj, direction="<", quiet=TRUE,
-                smooth=TRUE, smooth.method="density", bw=bw.nrd0(xj)*0.99),
+                smooth=TRUE, smooth.method="density", bw=bw.nrd0(xj)*1),
             error = function(e2) roc(y, x, direction="<", quiet=TRUE, smooth=FALSE)
           )
         }
@@ -887,9 +883,7 @@ for (oneside_estimate in c(F,T)){
       specificity <- data.frame(setNames(list(roc_obj$specificities), indicator[m]))
       auc_val     <- as.numeric(auc(roc_obj))
       
-      thresholds  <- if (!is.null(roc_obj$thresholds))
-        data.frame(setNames(list(roc_obj$thresholds), indicator[m]))
-      else NA
+      thresholds  <- if (!is.null(roc_obj$thresholds)) data.frame(setNames(list(roc_obj$thresholds), indicator[m])) else NA
       
       list(sensitivity=sensitivity, specificity=specificity, auc=auc_val, thresholds=thresholds)
     }
@@ -928,7 +922,7 @@ for (oneside_estimate in c(F,T)){
       filter(model!="Benchmark_GNI")
   
     final = left_join(sensitivity, specificity, by = c("model", 'id'))
-    final = final %>% filter(model!="VEC_GM_NC")
+    final = final %>% filter(model!="VEC_cust_NC")
     len<- length(unique(final$model))
     palette = c("#0B5471",  "#D2E288", "#5EC5C2",  "#D12E7C", "#F57D20", "#7e878e", "#FCAF17", "#DFCA94", "#000000", "#7C477E", "#0083A0", "#5EC5C2", "#007DC5")[1:len]
     
@@ -937,7 +931,7 @@ for (oneside_estimate in c(F,T)){
       filter(model!=c("CF_RPP")) %>%
       filter(model!=c("HP_RPP")) %>%
       ggplot() +
-      geom_line(aes(x = 1-specificity, y = sensitivity, colour = model), linewidth = 2.5) +
+      geom_line(aes(x = 1-specificity, y = sensitivity, colour = model), linewidth = 2.0) +
       geom_abline(colour = "#696969", linetype = 2) +
       theme_classic() +
       labs(
@@ -946,25 +940,25 @@ for (oneside_estimate in c(F,T)){
         title = ""
       )+
       theme(legend.position = "bottom",
-            plot.title = element_text(size = 40),
-            axis.text=element_text(size=40),
-            axis.title=element_text(size=40),
-            legend.text =element_text(size=40)) +
+            plot.title = element_text(size = 50),
+            axis.text=element_text(size=50),
+            axis.title=element_text(size=50),
+            legend.text =element_text(size=50)) +
       scale_colour_manual("", values = palette) +
       scale_linetype(guide = 'none')
-    if(c %in% c(1,2)){
+    if(c %in% c(2)){
     ggsave(paste0(path_plots,"/Early_warning/roc_NC_",all_crisis_names[c],".pdf"), roc_plot, height = 20, width = 25)
     }else{}
   
     roc_plot<- final %>%
-      filter(model!=c("OV_NC")) %>%
-      filter(model!=c("VEC_cust_NC")) %>%
+      filter(model!=c("OV_NC")) %>%#@comment if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
+      filter(model!=c("VEC_GM_NC")) %>%
       filter(model!=c("Benchmark_NC")) %>%
       filter(model!=c("HP_NC")) %>%
       filter(model!=c("CF_NC")) %>%
     
       ggplot() +
-      geom_line(aes(x = 1-specificity, y = sensitivity, colour = model), linewidth = 2.5) +
+      geom_line(aes(x = 1-specificity, y = sensitivity, colour = model), linewidth = 2.0) +
       geom_abline(colour = "#696969", linetype = 2) +
       theme_classic() +
       labs(
@@ -973,14 +967,14 @@ for (oneside_estimate in c(F,T)){
         title = ""
       )+
       theme(legend.position = "bottom",
-            plot.title = element_text(size = 40),
-            axis.text=element_text(size=40),
-            axis.title=element_text(size=40),
-            legend.text =element_text(size=40)) +
+            plot.title = element_text(size = 50),
+            axis.text=element_text(size=50),
+            axis.title=element_text(size=50),
+            legend.text =element_text(size=50)) +
       scale_colour_manual("", values = palette) +
       scale_linetype(guide = 'none')
     
-    if(c %in% c(1,2)){
+    if(c %in% c(2)){
     ggsave(paste0(path_plots,"/Early_warning/roc_RPP_",all_crisis_names[c],".pdf"), roc_plot, height = 20, width = 25)
     }else{}
     
@@ -1093,6 +1087,11 @@ for (oneside_estimate in c(F,T)){
     
     results<- results %>% filter(indicator!="Benchmark_GNI")
     
+    i <- !is.finite(results$Lambda) #Threshods are computed with Usefulness, however if this metrics is null, second best solution is to get the thresholds from the F1 max
+    results$Lambda[i] <- results$Threshold_F1[i]
+    j <- !is.finite(results$Lambda_scaled)
+    results$Lambda_scaled[j] <- results$Threshold_F1_scaled[j]
+    
     setwd(path_auc)
     if(oneside_estimate==F){
     openxlsx:: addWorksheet(wb,all_crisis_names[c])
@@ -1120,35 +1119,30 @@ for (oneside_estimate in c(F,T)){
       filter(crisis=="Babecky") %>% 
       dplyr::select(Lambda_scaled)
     sd_all<-all_thresholds_crisis %>% 
-      filter(crisis=="Babecky"| crisis== "Bank_crisis_1") %>% 
+      filter(crisis=="Babecky"| crisis== "Bank_crisis_1"| crisis== "Bank_crisis_2") %>% 
       dplyr::select(Lambda_scaled, Lambda) %>% 
       as.vector()
-    sd_all_scaled<- sd(sd_all$Lambda_scaled, na.rm = T)
-    sd_all<- sd(sd_all$Lambda, na.rm = T)
-    
-    Bank_crisis_12<-all_thresholds_crisis %>% 
-      filter(crisis==c("Bank_crisis_1","Bank_crisis_2")) %>% 
-      dplyr::select(Lambda_scaled, Lambda)
-    sd_all2_scaled<- sd(Bank_crisis_12$Lambda_scaled)
-    sd_all2<- sd(Bank_crisis_12$Lambda_scaled)
-    
-    sd_all_scaled<- sd_all2_scaled
-    sd_all<- sd_all2
+    sd_all_scaled<- sd(sd_all$Lambda_scaled, na.rm = T)/sum(!is.na(sd_all$Lambda_scaled))
+    sd_all<- sd(sd_all$Lambda, na.rm = T)/sum(!is.na(sd_all$Lambda))
     
     up_b_th<- min(Babecky+ sd_all,1)
     low_b_th<- max(Babecky- sd_all,0)
     all_thresholds_crisis<- c(Babecky, low_b_th, up_b_th,sd_all_scaled,sd_all)
       return(all_thresholds_crisis)}
-  
   list_indicator<- lapply(c(1:length(indicator)), FUN = function(s)s)
+  
   all_thresholds_crisis<- lapply(list_indicator,all_thresholds_crisis_f)
+  
+  if (oneside_estimate==F){
+    all_thresholds_crisis_fullsample<- lapply(list_indicator,all_thresholds_crisis_f)
+  }else{}
   
   res_F<- function(m){
     results<- results %>% 
     rename(indicator_=indicator) %>% 
     filter(indicator_==indicator[m]) %>% 
-    mutate(min_th_scaled=Lambda_scaled+all_thresholds_crisis[[m]][[4]]) %>% 
-    mutate(max_th_scaled=Lambda_scaled-all_thresholds_crisis[[m]][[4]]) %>% 
+    mutate(min_th_scaled=Lambda_scaled-all_thresholds_crisis[[m]][[4]]) %>% 
+    mutate(max_th_scaled=Lambda_scaled+all_thresholds_crisis[[m]][[4]]) %>% 
     mutate(min_th=Lambda+all_thresholds_crisis[[m]][[5]]) %>% 
     mutate(max_th=Lambda-all_thresholds_crisis[[m]][[5]])
   return(results)}
@@ -1162,7 +1156,7 @@ for (oneside_estimate in c(F,T)){
   
   if(oneside_estimate==T){
   }else{
-    results_twoside<- results}
+    results_fullsample<- results}
 
   #Plot metrics-------------
 plot_metric_data<- results %>% 
@@ -1179,48 +1173,59 @@ plot_metric_data<- results %>%
     'CF_RPP',
     "HP_NC",
     "HP_RPP",
-    "OV_NC",
+    "OV_NC",#@delete if no current updates are available from the O’Brien–Velasco estimates beyond last_date_earlywarning
     "VEC_GM_NC",
     "VEC_cust_NC"))) %>% 
-  filter(indicator!='VEC_GM_NC')
+  filter(indicator!='VEC_cust_NC')
 
 plot_metric<- ggplot(data = plot_metric_data, aes(x = indicator, y = value, fill = factor(metric))) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.5), width = 0.8) +
   guides(fill=guide_legend(title=""))+
   theme_classic() +
   labs(x = "",y = "metric", title = "")+
-  scale_x_discrete(guide = guide_axis(n.dodge = 2))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        text=element_text(size=40),
-        legend.text =element_text(size=40))+
+        plot.title = element_text(size = 50),
+        axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        text=element_text(size=50),
+        legend.text =element_text(size=50))+
   scale_fill_manual(values = c("#0B5471", "#5EC5C2", "#D2E288"),name='')+
   geom_text(
-    # data = subset(plot_metric_data, indicator == "Benchmark_NC"),
     aes(label = round(value, 2)),
     position = position_dodge(width = 0.8),
     vjust = -0.3,
-    size = 10
-  )
+    size = 9)
 ggsave(paste0(path_plots,"/Early_warning/metrics.pdf"), plot_metric, height = 20, width = 25)
 
-order_metrics<-c("Benchmark_NC","Benchmark_RPP","Benchmark_comp","HP_NC","HP_RPP", "CF_NC","CF_RPP", "OV_NC","VEC_cust_NC") #@select ORDER
+order_metrics<-c("Benchmark_NC","Benchmark_RPP","Benchmark_comp","HP_NC","HP_RPP", "CF_NC","CF_RPP", "OV_NC","VEC_GM_NC") #@select ORDER
 metricstab<- plot_metric_data %>% 
   pivot_wider(names_from =  metric, values_from = value) %>% 
   mutate(across(where(is.numeric),~round(.x,4))) %>% 
-  # mutate(across(where(is.numeric),~trunc(.x,4))) %>% 
   arrange(match(as.character(indicator), order_metrics))
 
+metricstab <- plot_metric_data %>% 
+  pivot_wider(names_from = metric, values_from = value) %>% 
+  arrange(match(as.character(indicator), order_metrics))
+
+base <- metricstab %>% filter(indicator == "Benchmark_comp") #@select deviation with respect to a specific indicator, normally take the best one as the reference
+metricstab <- metricstab %>%
+  mutate(
+    deviation_auc        = auc        / base$auc,
+    deviation_F1         = F1         / base$F1,
+    deviation_rel_useful = rel_useful / base$rel_useful) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
 openxlsx::write.xlsx(metricstab, file = paste0(base_path,"/D_Results/Tables/metrics_summary.xlsx"))
+
 }
 
-#Plots Cycles: indicator, thresholds and pre crisis period #This plot is based on the two sided estimates, thresholds too (results_twoside)
-data_roc<- merge(data_crisis[[2]], data_cycles, by='Date')#pre crisis periods
+#Plots Cycles: indicator, thresholds and pre crisis period. This plot is based on the Full sample estimates, thresholds too. If one-sided needed change results_fullsample for results and data_cycles for data_cycles_os
+data_roc<- merge(data_crisis[[2]], data_cycles, by='Date') #@ or data_cycles_os
+
 plot_f<- function(m){
   
-  thresholds_plot<-results_twoside %>% 
+  thresholds_plot<-results_fullsample %>% #@ or results for one side
     filter(crisis=="Babecky") %>% 
     filter(indicator_==indicator[m]) %>% 
     dplyr::select(Lambda_scaled, min_th_scaled,max_th_scaled)
@@ -1228,7 +1233,7 @@ plot_f<- function(m){
   last_date<- last(data_roc[,1])
   start_date<- first(data_roc[,1])
   
-  plot_crisi_cycles<-data_roc %>% 
+  plot_crisis_cycles<-data_roc %>% 
     dplyr:: select(Date, Crisis, Pre_crisis,indicator_prob[m]) %>% #correct Pre_crisis
     mutate(Date= as.yearqtr(Date)) %>% 
     pivot_longer(cols=c(Crisis, Pre_crisis,indicator_prob[m]) ,names_to = "variable", values_to = "value") %>% 
@@ -1238,25 +1243,23 @@ plot_f<- function(m){
     labs(x = "Quarter",y = "scaled cycle (0-1)", title = indicator[m])+
     scale_color_manual(values = cbi_palette[c(12,10,8)],breaks = c("Crisis", "Pre_crisis",indicator_prob[m]) ,name='', labels =c("Crisis", "Pre_crisis",paste0(indicator[m], "_cycle")))+
     scale_linetype_manual(values=c("solid", "dotdash", "solid"),breaks = c("Crisis", "Pre_crisis",indicator_prob[m]), name='', guide = "none")+
-    # geom_hline(yintercept =thresholds$`T(F1)scaled`[m], colour = cbi_palette[12], linetype='dotted', linewidth = 1.5)+
     geom_hline(yintercept =thresholds_plot$Lambda_scaled, colour = '#0083A0', linetype='dotted', linewidth = 1.5)+
     geom_hline(yintercept =thresholds_plot$min_th_scaled, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
     geom_hline(yintercept =thresholds_plot$max_th_scaled, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
-    labs(caption = "Middle dotted line: optimal threshold targeting pre crisis period, bounderies: +/-1 standard deviation among all the optimal thresholds targeting the pre crisis period and the pre bank in distress periods.")+
-    scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_date),as.yearqtr(start_date), by=-12)))+
+    scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_date),as.yearqtr(start_date), by=-5)))+
     guides(fill=guide_legend(title=""))+
     theme(legend.position = "bottom",
-          plot.title = element_text(size = 40),
-          axis.text=element_text(size=40),
-          axis.title=element_text(size=40),
-          text=element_text(size=40),
-          legend.text =element_text(size=40))
-  ggsave(paste0(path_plots,"/Early_warning/cycle_",all_crisis_names[2],indicator[m],".pdf"), plot_crisi_cycles, height = 20, width = 25)
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.title = element_text(size = 50),
+          axis.text=element_text(size=50),
+          axis.title=element_text(size=50),
+          text=element_text(size=50),
+          legend.text =element_text(size=50))
+  ggsave(paste0(path_plots,"/Early_warning/cycle_",indicator[m],".pdf"), plot_crisis_cycles, height = 20, width = 25)
   }
 lapply(list_indicator,plot_f)
 
 #3-Pseudo Real time estimates: New data points (nd)-----------------------------
-#Data frames ----- 
 limits_recursive_master<-100:198 #@Select according to the A.Main.Code/Master_Recursive.m
 name_files<- c('GNI', 'NC', 'RPP')
 files <- sprintf(paste0(base_path,"/A_Main_Code/Outcome/Results_n%d.xlsx"),limits_recursive_master )
@@ -1278,9 +1281,12 @@ to_date <- function(qstr){
   p <- strsplit(qstr, "q")[[1]]                 
   y <- as.integer(p[1]); q <- as.integer(p[2])  
   m <- c("01","04","07","10")[q]               
-  as.Date(paste0(y,"-",m,"-01"))                
-}                                               
-dates_all_chr  <- make_dates(first_date, max(limits_recursive_master))       
+  as.Date(paste0(y,"-",m,"-01"))}
+
+first_date_estim <- seq(as.yearqtr(first_date, format = "%Yq%q"),
+                        length.out = 14, by = 1/4) %>% last() %>% format("%Yq%q") #@Check first date benchmark model, normally we have a burn in period of 13 quarters (13+1), see A_Main_Code> GF3_S23_US_FIX_DYN_pars: Ym= X(13:end,1:3) 
+limits_estim<- max(limits_recursive_master)-13#@Check first date benchmark model, normally we have a burn in period of 13 quarters (13), see A_Main_Code> GF3_S23_US_FIX_DYN_pars: Ym= X(13:end,1:3)
+dates_all_chr  <- make_dates(first_date_estim, limits_estim)   
 dates_all_date <- as.Date(sapply(dates_all_chr, to_date))                      
 
 read_col <- function(k){
@@ -1289,35 +1295,32 @@ read_col <- function(k){
   m <- max(lengths(lst))
   df<- as.data.frame(lapply(lst, function(v){ length(v) <- m; v }), check.names = FALSE)
   df <- cbind(Date = dates_all_date[seq_len(nrow(df))], df)  
-  colnames(df) <- c("Date", dates_recursive)                  
-  return(df)
-}
+  colnames(df) <- c("Date", dates_recursive)
+  q_str <- dates_all_date %>% last() %>% as.yearqtr() %>% { . - 12/4 } %>% format("%Yq%q")#@select last date for plot pseudo real time, recommended leave 12 quarters (~burning period) before the last date, bind cols and Date cols with the same date
+  keep_q <- names(df)
+  keep_q <- keep_q[grepl("^[0-9]{4}q[1-4]$", keep_q)]
+  keep_q <- keep_q[as.yearqtr(keep_q, "%Yq%q") <= as.yearqtr(q_str, "%Yq%q")] 
+  df <- df %>%
+    filter(Date <= as.Date(as.yearqtr(q_str, "%Yq%q")))%>%
+    dplyr::select(Date, all_of(keep_q))                 
+  return(df)}
 recursivedata<-list(read_col(7),read_col(8),read_col(9))
-
 name_plot<- c('business cycle','credit cycle', 'house prices cycle')
 ind<-c(which(indicator==c("Benchmark_GNI")),which(indicator==c("Benchmark_NC")),which(indicator==c("Benchmark_RPP")))
-new_data_plot_f<- function(c){#c=1
 
+new_data_plot_f<- function(c){
   merged_df<- recursivedata[[c]] %>% 
     mutate(Date=as.Date(Date))
-  
-  dates_chr <- make_dates(first_date, limits_recursive_master %>% last(.))[first(limits_recursive_master):last(limits_recursive_master)]
-  date_seq  <- as.Date(as.yearqtr(sub("q"," Q", dates_chr), format = "%Y Q%q"))
+  date_seq  <- as.Date(as.yearqtr(sub("q"," Q", colnames(merged_df)[-1]), format = "%Y Q%q"))
   date_names <- as.character(as.yearqtr(date_seq, format = "%Y Q%q"))
-  
   colnames(merged_df) <- c("Date", date_names)
-  
+ 
   breaks_ <- as.yearqtr(
-    rev(seq(max(date_seq, na.rm = TRUE),
+    rev(seq(max(merged_df$Date, na.rm = TRUE),
             min(merged_df$Date, na.rm = TRUE),
-            by = -2500)), 
-    format = '%Y Q%q'
-  )
+            by = -3000)),
+    format = '%Y Q%q')
   
-  # date_names<-as.character(as.yearqtr(seq.Date(as.Date("2000-07-01"), as.Date("2024-10-01"), by = '1 quarter'), format = '%Y Q%q'))
-  # colnames(merged_df)<-c('Date',date_names)
-  # breaks_<-as.yearqtr(rev(seq(as.Date("2024-10-01"),as.Date("1978-01-01"), by=-2500)), format = '%Y Q%q')
-
   if(indicator[ind][c]=="Benchmark_GNI"){
     min_scaling<-min(data_ew[,indicator[ind][c]], na.rm = T)
     max_scaling<-max(data_ew[,indicator[ind][c]]-min_scaling, na.rm = T)
@@ -1327,9 +1330,9 @@ new_data_plot_f<- function(c){#c=1
   }else{
     min_scaling<-min(data_ew[,indicator[ind][c]], na.rm = T)
     max_scaling<-max(data_ew[,indicator[ind][c]]-min_scaling, na.rm = T)
-    benchmark_threshold<-  (all_thresholds_crisis[[ind[c]]][[1]]*max_scaling)+min_scaling
-    benchmark_threshold_lb<-(all_thresholds_crisis[[ind[c]]][[2]]*max_scaling)+min_scaling
-    benchmark_threshold_ub<-(all_thresholds_crisis[[ind[c]]][[3]]*max_scaling)+min_scaling}
+    benchmark_threshold<-  (all_thresholds_crisis_fullsample[[ind[c]]][[1]]*max_scaling)+min_scaling #full sample estimates threshold
+    benchmark_threshold_lb<-(all_thresholds_crisis_fullsample[[ind[c]]][[2]]*max_scaling)+min_scaling 
+    benchmark_threshold_ub<-(all_thresholds_crisis_fullsample[[ind[c]]][[3]]*max_scaling)+min_scaling}
 
   max_V<- max(merged_df[, -1], na.rm = T)
   min_V<- min(merged_df[, -1], na.rm = T)
@@ -1355,32 +1358,34 @@ new_data_plot_f<- function(c){#c=1
     theme_classic() +
     labs(x = "Quarter",y = "log", title = "")+
     scale_color_manual(values = c('grey', colorRampPalette(c("#F57D20", "#000000"))(length(date_names))), name='',
-                       breaks = c('Pre_crisis', "2024 Q3"), labels = c("Pre_crisis",name_plot[c]))+
+                       breaks = c('Pre_crisis', as.yearqtr(last(date_names))), labels = c("Pre_crisis",name_plot[c]))+
     scale_x_yearqtr(format = "%YQ%q", breaks=breaks_)+
+    # coord_cartesian(xlim = c(min(merged_df$Date), max(merged_df$Date)))+
     guides(fill=guide_legend(title=""))+
     geom_hline(yintercept = benchmark_threshold, colour =  '#0083A0', linetype='dotted', linewidth = 1.5)+#AMEND THREHSOLD
     geom_hline(yintercept = benchmark_threshold_lb, colour ='#FCAF17', linetype='dotted', linewidth = 1.5)+
     geom_hline(yintercept = benchmark_threshold_ub, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
     geom_vline(xintercept =as.yearqtr(gfc_crisis, format = '%Y Q%q') , colour = cbi_palette[7], linetype='dashed', linewidth = 1.1)+
     theme(legend.position = "bottom",
-          plot.title = element_text(size = 40),
-          axis.text=element_text(size=40),
-          axis.title=element_text(size=40),
-          text=element_text(size=40),
-          legend.text =element_text(size=40))+
+          plot.title = element_text(size = 50),
+          axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+          axis.text=element_text(size=50),
+          axis.title=element_text(size=50),
+          text=element_text(size=50),
+          legend.text =element_text(size=50))+
     annotate("rect", xmin = date_names[1], xmax = last(date_names),
              ymin=-Inf, ymax=Inf, fill='gray', alpha=0.8)
 
-  ggsave(paste0(path_plots,"/Early_warning/pseudo_rt_",name_files[c], ".pdf"), plot_, height = 20, width = 25)
+  ggsave(paste0(path_plots,"/Real_Time/pseudo_rt_",name_files[c], ".pdf"), plot_, height = 20, width = 25)
   }
 list_vars<- lapply(c(1:3), FUN = function(s)s)
 lapply(list_vars,new_data_plot_f)
 
-#Plot composite indicator
+#Plot composite indicator - thresholds adjusted (min max RPP and NC cycles)
 data_roc<- merge(data_crisis[[2]], data_cycles, by='Date')#pre crisis periods
-thresholds_plot<-results %>% 
-  filter(crisis=="Babecky") %>% 
-  filter(indicator_%in% c("Benchmark_RPP","Benchmark_NC")) %>% 
+thresholds_plot<-results_fullsample %>%
+  filter(crisis=="Babecky") %>%
+  filter(indicator_%in% c("Benchmark_RPP","Benchmark_NC")) %>%
   dplyr::select(Lambda_scaled, min_th_scaled,max_th_scaled)
 thresholds_plot_<-c(mean(thresholds_plot$Lambda_scaled), min(thresholds_plot$min_th_scaled), max(thresholds_plot$max_th_scaled))
 thresholds_plot_<- as.data.frame(t(thresholds_plot_))
@@ -1390,31 +1395,133 @@ thresholds_plot<-thresholds_plot_
 last_date<- last(data_roc[,1])
 start_date<- first(data_roc[,1])
 
-plot_crisis_cycles<-data_roc %>% 
+plot_crisis_cycles<-data_roc %>%
   dplyr:: select(Date, Crisis, Pre_crisis,'Benchmark_comp') %>% #correct Pre_crisis
-  mutate(Date= as.yearqtr(Date)) %>% 
-  #mutate(Crisis= (Crisis*max(Benchmark_comp, na.rm=T))+min(Benchmark_comp, na.rm=T)) %>% 
-  #mutate(Pre_crisis= (Pre_crisis*max(Benchmark_comp, na.rm=T))+min(Benchmark_comp, na.rm=T)) %>% 
-  mutate(Crisis= ifelse(Crisis==1, max(Benchmark_comp, na.rm=T), min(Benchmark_comp, na.rm=T))) %>% 
-  mutate(Pre_crisis= ifelse(Pre_crisis==1, max(Benchmark_comp, na.rm=T), min(Benchmark_comp, na.rm=T))) %>%  
-  pivot_longer(cols=c(Crisis, Pre_crisis,'Benchmark_comp') ,names_to = "variable", values_to = "value") %>% 
-  ggplot()+ 
+  mutate(Date= as.yearqtr(Date)) %>%
+  mutate(Crisis= ifelse(Crisis==1, max(Benchmark_comp, na.rm=T), min(Benchmark_comp, na.rm=T))) %>%
+  mutate(Pre_crisis= ifelse(Pre_crisis==1, max(Benchmark_comp, na.rm=T), min(Benchmark_comp, na.rm=T))) %>%
+  pivot_longer(cols=c(Crisis, Pre_crisis,'Benchmark_comp') ,names_to = "variable", values_to = "value") %>%
+  ggplot()+
   geom_line(aes(x=Date, y=value, colour = variable, linetype=variable), linewidth = 1.5)+
   theme_classic() +
   labs(x = "Quarter",y = "scaled cycle (0-1)", title = 'Benchmark_comp')+
   scale_color_manual(values = cbi_palette[c(12,10,8)],breaks = c("Crisis", "Pre_crisis",'Benchmark_comp') ,name='', labels =c("Crisis", "Pre_crisis",paste0('Benchmark_comp', "_cycle")))+
   scale_linetype_manual(values=c("solid", "dotdash", "solid"),breaks = c("Crisis", "Pre_crisis",'Benchmark_comp'), name='', guide = "none")+
-  # geom_hline(yintercept =thresholds$`T(F1)scaled`[m], colour = cbi_palette[12], linetype='dotted', linewidth = 1.5)+
   geom_hline(yintercept =thresholds_plot$Lambda_scaled, colour = '#0083A0', linetype='dotted', linewidth = 1.5)+
   geom_hline(yintercept =thresholds_plot$min_th_scaled, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
   geom_hline(yintercept =thresholds_plot$max_th_scaled, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
   scale_x_yearqtr(format = "%YQ%q", breaks=rev(seq(as.yearqtr(last_date),as.yearqtr(start_date), by=-12)))+
   guides(fill=guide_legend(title=""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        text=element_text(size=40),
-        legend.text =element_text(size=40))
-ggsave(paste0(path_plots,"/Early_warning/",all_crisis_names[2],"_Benchmark_comp.pdf"), plot_crisis_cycles, height = 20, width = 25)
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        text=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(path_plots,"/Early_warning/cycle_Benchmark_comp.pdf"), plot_crisis_cycles, height = 20, width = 25)
+
+#4-Main results-----------------------------------------------------------------
+main_results<-openxlsx::read.xlsx(paste0(base_path,"/A_Main_Code/Outcome/Results_main.xlsx"), colNames = F)
+main_results$Date<- seq.Date(first_date_benchmark, length.out = length(main_results[,1]), by = '1 quarter')
+main_results<- main_results %>% 
+  mutate(Date=as.Date(Date)) %>% 
+  na.omit()
+last_date<- main_results$Date %>% last()
+GNI<- main_results %>%  rename(data='X1',trend='X4',cycle='X7') %>%
+  dplyr::select(Date,data, trend, cycle)
+NC<- main_results %>% rename(data='X2',trend='X5',cycle='X8') %>% 
+  dplyr::select(Date,data, trend, cycle) 
+RPP<- main_results %>% rename(data='X3',trend='X6',cycle='X9') %>% 
+  dplyr::select(Date,data, trend, cycle)
+varlist<- c("GNI", 'NC', "RPP")
+list_data<- list(GNI=GNI, NC=NC,RPP=RPP)
+first_q <- as.yearqtr(first_date_benchmark)
+last_q  <- as.yearqtr(last_date)
+
+plot_main<- function(s){
+  dt <- list_data[[s]] %>%
+    mutate(Date = as.yearqtr(Date)) %>%
+    pivot_longer(cols = c(data, trend), names_to = "variable", values_to = "value") %>%
+    ggplot() +
+    geom_line(aes(x = Date, y = value, colour = variable)) +
+    theme_classic() +
+    labs(x = "Quarter", y = "log - EU billion", title = varlist[s]) +
+    scale_color_manual(values = cbi_palette[c(1,4)], name = "") +
+    scale_x_yearqtr(format = "%YQ%q",
+                    breaks = rev(seq(last_q, first_q, by = -10))) +
+    guides(fill = guide_legend(title = "")) +
+    theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.title  = element_text(size = 50),
+          axis.text   = element_text(size = 50),
+          axis.title  = element_text(size = 50),
+          legend.text = element_text(size = 50))
+  
+  c<- list_data[[s]] %>%
+    mutate(Date= as.yearqtr(Date)) %>% 
+    pivot_longer(cols=cycle ,names_to = "variable", values_to = "value") %>% 
+    ggplot()+ 
+    geom_line(aes(x=Date, y=value, colour = variable)) +
+    theme_classic() +
+    labs(x = "Quarter",y = "log - EU billion", title = "")+
+    scale_color_manual(values = cbi_palette[c(8)], name='')+
+    scale_x_yearqtr(format = "%YQ%q",
+                    breaks = rev(seq(last_q, first_q, by = -10))) +
+    guides(fill=guide_legend(title=""))+
+    geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
+    theme(legend.position = "bottom",
+          plot.title = element_text(size = 50),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          axis.text=element_text(size=50),
+          axis.title=element_text(size=50),
+          legend.text =element_text(size=50))
+  
+  plot_d_t_c<- grid.arrange(dt, c, nrow = 1)
+  ggsave(paste0(base_path,"/D_Results/Plots/Main_Results/main_results_",varlist[s], ".pdf"), plot_d_t_c, height = 20, width = 25)
+}
+select_var_data<-list(GNI=1, NC=2,RPP=3)
+lapply(select_var_data,plot_main)
+
+#Plot Financial  Cycles Together
+dt<-cbind(list_data[[1]][, c("Date", 'cycle' )],list_data[[2]][, c('cycle' )])
+dt<-cbind(dt,list_data[[3]][, c( 'cycle' )]) 
+colnames(dt)<-  c("Date", 'GNI_cycle', 'NC_cycle', 'RPP_cycle')
+
+plotfincycles<-dt %>%  mutate(Date= as.yearqtr(Date)) %>% 
+  mutate(GNI_cycle=GNI_cycle*3) %>% 
+  dplyr::select(-GNI_cycle) %>% 
+  pivot_longer(cols=c('NC_cycle', 'RPP_cycle'), values_to = "value", names_to = 'variable') %>% 
+  ggplot()+ 
+  geom_line(aes(x=Date, y=value, colour = variable), size=1.5) +
+  labs(x = "Quarter",y = "", title = "")+
+  theme_classic() +
+  scale_y_continuous("House Prices & National Credit cycles")+
+  scale_color_manual(values = cbi_palette[c(1, 4)], name='')+
+  scale_x_yearqtr(format = "%YQ%q",
+                  breaks = rev(seq(last_q, first_q, by = -5))) +
+  guides(fill=guide_legend(title=""))+
+  geom_hline(yintercept = 0, colour = cbi_palette[12], linetype='dotted')+
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 50),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(base_path,"/D_Results/Plots/Main_Results/main_results_fin_cycles.pdf"), plotfincycles, height = 20, width = 25)
+
+#Key takeaway for the paper:
+cat(sprintf(
+  "📄 Last data point available for Early Warning Properties Assessment: %s\n",
+  as.yearqtr(last_date_earlywarning)))
+
+cat(sprintf(
+  "📄 Cointegration order VECM-GM, see Values of teststatistic and critical values of test:"))
+gm_coint
+cat(sprintf(
+  "📄 Cointegration order VECM-Cust,see Values of teststatistic and critical values of test:"))
+cust_coint
+
+cat(sprintf(
+  "📄 Tables: Cycle lengths and volatility across selected countries: IE, Standard Deviation of cycles"))
+c(GNI=sd(list_data[[1]]$cycle), NC=sd(list_data[[2]]$cycle),RPP=sd(list_data[[3]]$cycle)) %>% round(.,2)
 

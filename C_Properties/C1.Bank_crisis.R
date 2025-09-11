@@ -10,7 +10,6 @@ library(readxl)
 library(writexl)
 library(data.table)
 library(zoo)
-library(xlsx)
 library(tseries)
 library(mFilter)
 library(ggpubr)
@@ -30,7 +29,6 @@ library(grid)
 library(openxlsx)
 library(janitor)
 library(forecast)
-#library(RJDemetra)#for seasonally adjusted series
 
 #Directories and colors
 rm(list = ls())
@@ -118,11 +116,14 @@ data<- data %>%
 data_reg<- data %>% na.omit()
 
 ols<- lm(data = data_reg, formula = assets_yoy ~ assets_yoy_1 +log_rpp_prices_yoy_1)
-summary(ols)
+summary_ols<- summary(ols)
+rsq <- summary(ols)$r.squared
+adj_rsq <- summary(ols)$adj.r.squared
+
 
 #Predict with 0.95 confidence intervals
 length_data<-length(data$assets_yoy)
-predict<-  predict(ols, interval='confidence', data,  level = 0.95)
+predict<-  predict(ols, interval='confidence', data,  level = 0.95)#@Select confidence interval
 length_pred<-length(predict[,1])
 data$residuals_fit<- data$assets_yoy - c(rep(NA, length_data-length_pred),  predict[,1])
 data$residuals_fit_lw<- data$assets_yoy - c(rep(NA, length_data-length_pred),  predict[,2])
@@ -157,19 +158,12 @@ ggplot(data, aes(x=Date))+geom_line(aes(y=asset_extrapol_level))+geom_line(aes(y
 ggplot(data, aes(x=Date))+geom_line(aes(y=assets_extrapol, color="exrtapolation"))+geom_line(aes(y=assets_yoy, color="realized"))+
   scale_color_manual(values = c("exrtapolation" = cbi_palette[c(1)],"realized" = cbi_palette[c(4)]))
 
-#Calculate seasonally adjusted
-
+#Seasonally adjusted
 data = data %>% 
   filter(Date>="1977-01-01") %>% 
   mutate(asset_extrapol_level_sa = ifelse(!is.na(asset_extrapol_level), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(asset_extrapol_level, frequency = 4)), s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
   mutate(asset_extrapol_level_sa_qoq= asset_extrapol_level_sa/lag(asset_extrapol_level_sa,1)-1) %>%
   mutate(asset_extrapol_level_sa_qoq= zoo::rollmean(asset_extrapol_level_sa_qoq, k = 4, fill = NA, align = "right", na.rm=T))
-  
-# data = data %>% 
-#   filter(Date>="1977-01-01") %>% 
-#   mutate(asset_extrapol_level_sa = ifelse(!is.na(asset_extrapol_level), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(asset_extrapol_level, frequency = 4)), s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
-#   # mutate(asset_extrapol_level_sa= c(rep(NA, length(which(is.na(asset_extrapol_level)==T))) , as.vector(x13(ts(asset_extrapol_level, frequency = 4))$final[[1]][,"sa"]))) %>% 
-#   # mutate(asset_extrapol_level_sa_qoq= asset_extrapol_level_sa/lag(asset_extrapol_level_sa,1)-1)
 
 #Risk tolerance set up rule ------------
 option<- c("asset_extrapol_level_sa_qoq", "assets_extrapol")
@@ -216,22 +210,22 @@ reference_th<-c('dummy (0%, 2Q)','dummy (0.1%, 2Q)','dummy (0%, 4Q)', 'dummy (0.
 
 #Plots--------------
 extrapolation_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=assets_yoy, color='Assets'), size = 1.5)+
+  geom_line(aes(y=assets_yoy, color='Data'), size = 1.5)+
   geom_line(aes(y=assets_extrapol, color='extrapolation/fitted'), size = 1.5)+
   geom_ribbon(aes(ymin=residuals_fit_lw, ymax=residuals_fit_up, fill='CI_95'), alpha=0.6)+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
-  scale_color_manual(values = c("Assets" = cbi_palette[c(1)],"extrapolation/fitted" = cbi_palette[c(2)]))+
+  scale_color_manual(values = c("Data" = cbi_palette[c(1)],"extrapolation/fitted" = cbi_palette[c(2)]))+
   scale_fill_manual(values = c("CI_95" = 'grey'), guide='none')+
   geom_hline(aes(yintercept=0), color='grey', linetype="dashed")+
   ylab("yoy change")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/banking_crisis_extrapolation_yoy.pdf"), extrapolation_plot, height = 20, width = 25)
 
 yoy_growth_plot_gni<- ggplot(data=data, aes(x=Date))+
@@ -244,10 +238,10 @@ yoy_growth_plot_gni<- ggplot(data=data, aes(x=Date))+
   ylab("yoy change")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/banking_crisis_GNI.pdf"), yoy_growth_plot_gni, height = 20, width = 25)
 
 yoy_growth_plot_rpp<- ggplot(data=data, aes(x=Date))+
@@ -260,10 +254,10 @@ yoy_growth_plot_rpp<- ggplot(data=data, aes(x=Date))+
   ylab("yoy change")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/banking_crisis_RPP.pdf"), yoy_growth_plot_rpp, height = 20, width = 25)
 
 dummy_bcrisis_2q<- ggplot(data=data, aes(x=Date))+
@@ -280,10 +274,10 @@ dummy_bcrisis_2q<- ggplot(data=data, aes(x=Date))+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
         legend.title = element_blank(),
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/banking_crisis_2Q.pdf"), dummy_bcrisis_2q, height = 20, width = 25)
 
 dummy_bcrisis_4q<- ggplot(data=data, aes(x=Date))+
@@ -301,10 +295,10 @@ dummy_bcrisis_4q<- ggplot(data=data, aes(x=Date))+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
         legend.title = element_blank(),
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/banking_crisis_4Q.pdf"), dummy_bcrisis_4q, height = 20, width = 25)
 
 #Export crisis dummy-----------------
@@ -316,6 +310,14 @@ addWorksheet(wb,'Bank_crisis_dummy')
 writeData(wb, sheet = "Bank_crisis_dummy", data.frame(data_crisis))
 saveWorkbook(wb,paste0(path,"/1.Crisis_events/Bank_crisis_dummy.xlsx"), overwrite = TRUE)
 
+max_run_ones <- function(x) {
+  r <- rle(as.integer(x == 1))
+  if (any(r$values == 1)) max(r$lengths[r$values == 1]) else 0}
+cols <- paste0("dummy_", 1:4)
+max_runs <- sapply(data_crisis[ , cols, drop = FALSE], max_run_ones)
+below2<- max_runs[c(1,2)] %>% max()
+below4<- max_runs[c(3,4)] %>% max()
+
 #Export Assets extrapolation-----------------
 data_assets<- data %>% 
   dplyr::select(Date, asset_extrapol_level, assets_extrapol) #assets_extrapol= YOY
@@ -325,3 +327,15 @@ wb <- createWorkbook(nameworkbook)
 addWorksheet(wb,'Bank_assets_extrapolated')
 writeData(wb, sheet = "Bank_assets_extrapolated", data.frame(data_assets))
 saveWorkbook(wb, paste0(path,"/1.Crisis_events/Bank_assets_extrapolated.xlsx"), overwrite = TRUE)
+
+#Key takeaway for the paper:
+print("🚀 Check also the fit:")
+summary_ols
+cat("📊 Model performance for extrapolation:\n",
+    "✅ R-squared:", sprintf("%.3f", rsq), "\n",
+    "✅ Adjusted R-squared:", sprintf("%.3f", adj_rsq), "\n")
+
+cat(sprintf(
+  "📄 Applying this rule with a 0.1%% threshold, we identify %d quarters in which the four-quarter moving average of qoq asset growth remained below the threshold for at least four consecutive quarters, compared with %d quarters when considering declines lasting at least two consecutive quarters.\n",
+  below4, below2
+))

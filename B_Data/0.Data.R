@@ -12,7 +12,6 @@ library(ecb)
 library(openxlsx)
 library(stringr)
 library(forecast)
-# library(RJDemetra) for X13 function/seasasonally adjusted, used in original paper, here replaced by seasadj from seasadj package
 
 #Paths and folders
 rm(list = ls())
@@ -128,7 +127,7 @@ CPI_all_q<- CPI_all %>%
   dplyr::select(Date, CPI_all_q) %>% 
   distinct()%>% 
   as.data.frame() %>% 
-  mutate(CPI= CPI_all_q/last(CPI_all_q))# rebased to 100 LAST quarter, so variables are expressed in contemporanous values
+  mutate(CPI= CPI_all_q/last(CPI_all_q))# rebased to 100 LAST quarter, so variables are expressed in contemporaneous values
 
 data<-merge.data.frame(data, CPI_all_q, by='Date')
 
@@ -150,8 +149,8 @@ save_plots <- paste0(getwd(), '/D_Results/Plots')
 setwd(path)
 
 GNI_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=GNI_cl/1000, color='Chow-Li'))+
-  geom_line(aes(y=GNIq/1000, color='Linear')) + 
+  geom_line(aes(y=GNI_cl/1000, color='Chow-Li'), size=1.5)+
+  geom_line(aes(y=GNIq/1000, color='Linear'), size=1.5) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
@@ -159,29 +158,29 @@ GNI_plot<- ggplot(data=data, aes(x=Date))+
   ylab("GNI (Euro billion)")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 
 GNI_r_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=GNI_rlcl, color='Chow-Li'))+
-  geom_line(aes(y=GNI_rlq, color='Linear')) + 
+  geom_line(aes(y=GNI_rlcl, color='Chow-Li'), size=1.5)+
+  geom_line(aes(y=GNI_rlq, color='Linear'), size=1.5) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
   scale_color_manual(values = c( "#5ab4ac","#d8b365"))+
-  ylab("GNI (Euro billion)")+
+  ylab("GNI (real Euro billion)")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 
 GNI_yoy_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=GNI_cl_qoq, color='Chow-Li'))+
-  geom_line(aes(y=GNIq_qoq, color='Linear')) + 
+  geom_line(aes(y=GNI_cl_qoq, color='Chow-Li'), size=1.5)+
+  geom_line(aes(y=GNIq_qoq, color='Linear'), size=1.5) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
@@ -189,12 +188,12 @@ GNI_yoy_plot<- ggplot(data=data, aes(x=Date))+
   ylab("GNI q-o-q growth (%)")+
   guides(color = guide_legend(title = "Interpolation"))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 
-(sd(data$GNIq_qoq,na.rm = T)-sd(data$GNI_cl_qoq,na.rm = T))*100 #dispersion of linear interpolation is x percentage points above the one obtained with Chow-Li
+chowlinvslinear<- (sd(data$GNIq_qoq,na.rm = T)-sd(data$GNI_cl_qoq,na.rm = T))*100 #dispersion of linear interpolation is x percentage points above the one obtained with Chow-Li
 
 ggsave(paste0(save_plots,"/Data/GNI.pdf"), GNI_plot, height = 20, width = 25)
 ggsave(paste0(save_plots,"/Data/GNI_yoy.pdf"), GNI_yoy_plot, height = 20, width = 25)
@@ -294,24 +293,15 @@ data<- data %>%
   mutate(Tot_cred_ratio= (Tota_cred)/GNIq) %>% 
   mutate(Tot_cred_ratio_cl= (Tota_cred)/GNI_cl) %>% 
   mutate(Nat_cred_l_sa = ifelse(!is.na(Nat_cred),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
-  #mutate(Nat_cred_l_sa= ifelse(!is.na(Nat_cred), (log10(as.vector(x13(ts(Nat_cred, frequency = 4))$final[[1]][,"sa"]))),NA)) %>% 
   mutate(Nat_cred_sa = ifelse(!is.na(Nat_cred),as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred, frequency = 4)),s.window = "periodic", robust = TRUE))), NA_real_ )) %>% 
-  #mutate(Nat_cred_sa= ifelse(!is.na(Nat_cred), as.vector(x13(ts(Nat_cred, frequency = 4))$final[[1]][,"sa"]),NA)) %>% 
   mutate(GNI_sa = ifelse(!is.na(GNI_cl), as.numeric(seasadj(stl(forecast::na.interp(ts(GNI_cl/1000, frequency = 4)),s.window = "periodic", robust = TRUE))),NA_real_)) %>%
-  #mutate(GNI_sa= ifelse(!is.na(GNI_cl), as.vector(x13(ts(GNI_cl/1000, frequency = 4))$final[[1]][,"sa"]), NA))%>% 
   mutate(GNI_l_sa = ifelse(!is.na(GNI_cl),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(GNI_cl/1000, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
-  #mutate(GNI_l_sa= ifelse(!is.na(GNI_cl), log10(as.vector(x13(ts(GNI_cl/1000, frequency = 4))$final[[1]][,"sa"])), NA))%>% 
   mutate(rpp_price_index_sa = ifelse(!is.na(rpp_price_index), as.numeric(seasadj(stl(forecast::na.interp(ts(rpp_price_index, frequency = 4)),s.window = "periodic", robust = TRUE))), NA_real_)) %>% 
-  #mutate(rpp_price_index_sa= ifelse(!is.na(rpp_price_index), as.vector(x13(ts(rpp_price_index, frequency = 4))$final[[1]][,"sa"]), NA))%>% 
   mutate(rpp_price_index_l_sa = ifelse(!is.na(rpp_price_index), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(rpp_price_index, frequency = 4)), s.window = "periodic", robust = TRUE)))),NA_real_)) %>% 
-  #mutate(rpp_price_index_l_sa= ifelse(!is.na(rpp_price_index), log10(as.vector(x13(ts(rpp_price_index, frequency = 4))$final[[1]][,"sa"])),NA)) %>% 
   mutate(Nat_cred_rl_sa = ifelse(!is.na(Nat_cred_r), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred_r, frequency = 4)),s.window = "periodic", robust = TRUE)))), NA_real_)) %>% 
-  #mutate(Nat_cred_rl_sa= ifelse(!is.na(Nat_cred_r), (log10(as.vector(x13(ts(Nat_cred_r, frequency = 4))$final[[1]][,"sa"]))),NA)) %>% 
   mutate(GNI_rl_sa = ifelse(!is.na(GNI_rcl),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(GNI_rcl/1000, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>% 
-  #mutate(GNI_rl_sa= ifelse(!is.na(GNI_rcl/1000), log10(as.vector(x13(ts(GNI_rcl/1000, frequency = 4))$final[[1]][,"sa"])), NA))%>% 
   mutate(rpp_price_index_rl_sa = ifelse(!is.na(rpp_price_index_r),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(rpp_price_index_r, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_))
-  #mutate(rpp_price_index_rl_sa= ifelse(!is.na(rpp_price_index_r), log10(as.vector(x13(ts(rpp_price_index_r, frequency = 4))$final[[1]][,"sa"])),NA))
-  
+
 data_model<-data %>% dplyr::select(Date, GNI_l_sa, Nat_cred_l_sa, rpp_price_index_l_sa) %>% 
   mutate(Date=str_to_lower(str_remove(as.yearqtr(as.Date(Date)), " "))) 
 colnames(data_model)<- NULL
@@ -327,8 +317,8 @@ save_plots <- paste0(getwd(), '/D_Results/Plots')
 setwd(path)
 
 nfc_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=NFC_credit_national, color='National'))+
-  geom_line(aes(y=NFC_credit_total, color='Total')) + 
+  geom_line(aes(y=NFC_credit_national, color='National'), size=1.5)+
+  geom_line(aes(y=NFC_credit_total, color='Total'), size=1.5) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
@@ -336,20 +326,20 @@ nfc_plot<- ggplot(data=data, aes(x=Date))+
   ylab("NFC credit EU Billion")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/Data/nfc_credit.pdf"), nfc_plot, height = 20, width = 25)
 
-#Graph on VARIABLES to MODEL
+#Graph on Variables used in the model
 setwd(paste0(path, "/../"))
 getwd()
 save_plots <- paste0(getwd(), '/D_Results/Plots')
 setwd(path)
 
 cred_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=Nat_cred_rl_sa, color='National Credit'))+
+  geom_line(aes(y=Nat_cred_rl_sa, color='National Credit'), size=1.5)+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
@@ -357,10 +347,10 @@ cred_plot<- ggplot(data=data, aes(x=Date))+
   ylab("National Credit real logs")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/Data/cred_plot.pdf"), cred_plot, height = 20, width = 25)
 
 rpp_plot<- ggplot(data=data, aes(x=Date))+
@@ -372,14 +362,14 @@ rpp_plot<- ggplot(data=data, aes(x=Date))+
   ylab("House Prices real log")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/Data/rpp_plot.pdf"), rpp_plot, height = 20, width = 25)
 
 gni_plot<- ggplot(data=data, aes(x=Date))+
-  geom_line(aes(y=GNI_rl_sa, color='GNI'))+
+  geom_line(aes(y=GNI_rl_sa, color='GNI'), size=1.5)+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
   theme(legend.position="bottom",legend.title = element_text(size = 8)) +
@@ -387,40 +377,172 @@ gni_plot<- ggplot(data=data, aes(x=Date))+
   ylab("GNI real log")+
   guides(color = guide_legend(title = ""))+
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 40),
-        axis.text=element_text(size=40),
-        axis.title=element_text(size=40),
-        legend.text =element_text(size=40))
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
 ggsave(paste0(save_plots,"/Data/gni_plot.pdf"), gni_plot, height = 20, width = 25)
 
 #Export data
-# write.csv(data_model, paste0(path, "/data_model_nominal.csv"), row.names = FALSE)
+# write.csv(data_model, paste0(path, "/data_model_nominal.csv"), row.names = FALSE)#@Uncomment if nominal data needed
 write.csv(data, paste0(path, "/data_full.csv"), row.names = FALSE)
 write.csv(data_model_r, paste0(base_path, "/A_Main_Code/data_model.csv"), row.names = FALSE)
 
+#HH loan interest rates in order to perform VECM model
+#Loan rates data----------------------------------
+names_loan_rates_old<-read.csv(paste0(base_path, "/B_Data/Raw_data/Loan_Rates//", "b.1.2.csv"), header = F)[1,] # I am not sure if in the future the CBI will change the order/names of the variables, I suggest we always compare the new dowloaded data with the names found at the moment we did this code
+loan_rates<- read.csv("https://opendata.centralbank.ie/dataset/4ba390e9-c0de-4da3-a7e2-e47acdaa21ce/resource/120a26a9-acb6-473e-9b9a-469f9b0037eb/download/b.1.2.csv", header = F) 
+names_loan_rates<- loan_rates[1,]
+names_ok<- unique(as.character(names_loan_rates==names_loan_rates_old))
+ifelse(names_ok=='TRUE', "Ok", "Download this manually")#The series we want to download are Loans to households, overdrafts, interest rate (%) =position 2, and Loans to non-financial corporations, overdrafts, interest rate (%) =position 9
+HH_loan_rates<-loan_rates %>%
+  slice(-1) %>%
+  dplyr::select("V1", 'V5') %>%
+  rename(Date=V1, HH_loan_rates=V5) %>%
+  mutate(Date=as.Date(Date,format = "%d/%m/%Y")) %>% 
+  mutate(HH_loan_rates=as.numeric(HH_loan_rates)) %>% 
+  mutate(Date= ceiling_date(Date, unit = "month")) %>% 
+  as.data.frame()
+
+#Source: MFD: Variable_Mortgage_Rates.xlsx - Column A: Mortgage Rates - All Mortgage Lenders (see note 3) Midpoint i.e. Average of lowest and highest rates
+loan_rates_old<- readxl::read_xlsx(paste0(base_path, "/B_Data/Raw_data/", "Data_pre.xlsx"), sheet = 'Monthly')[,c(1,2)] 
+loan_rates_old<- loan_rates_old %>% 
+  mutate(Date=as.Date(Date,format = "%d/%m/%Y")) %>% 
+  mutate(HH_loan_rates=as.numeric(HH_loan_rates)) %>% 
+  mutate(Date= ceiling_date(Date, unit = "month")) %>% 
+  as.data.frame() %>% 
+  mutate(HH_loan_rates= as.numeric(HH_loan_rates))
+
+compare_old<- loan_rates_old %>% 
+  filter(Date>="2003-02-01") 
+compare_new<- HH_loan_rates %>% 
+  filter(Date<="2005-08-01") 
+level<- mean(compare_old[,2]-compare_new[,2])
+
+loan_rates_old<- loan_rates_old %>% 
+  mutate(HH_loan_rates=HH_loan_rates+level) %>% 
+  filter(Date<"2003-02-01") %>% 
+  filter(Date>="1975-10-01")
+
+HH_loan_rates<- rbind(loan_rates_old , HH_loan_rates) %>% 
+  mutate(Date=as.Date(as.yearqtr(Date)))%>% 
+  group_by(Date) %>%
+  mutate(HH_loan_rates=mean(HH_loan_rates, na.rm = T)) %>% 
+  mutate(HH_loan_rates=log(HH_loan_rates))
+str(HH_loan_rates)
+ggplot(HH_loan_rates, aes(x=Date, y=HH_loan_rates))+geom_line(size=1.5)+geom_vline(xintercept = as.Date("2003-02-01"))
+
+CPI_all<- cso_get_data('CPM01', pivot_format = "tall", use_dates = TRUE, use_factors = FALSE, cache = FALSE) %>% 
+  filter(Statistic=='Consumer Price Index (Base Dec 2016=100)')%>%
+  filter(Commodity.Group== 'All items') %>% 
+  rename(Date=Month) %>% 
+  mutate(Date = as.Date(Date)) %>%
+  dplyr::select(Date,value) %>% 
+  rename(CPI_all=value) %>% 
+  as.data.frame()
+
+CPI_all<- CPI_all %>% 
+  mutate(Date = as.Date(Date)) %>% 
+  mutate(Date =as.Date(as.yearqtr(Date))) %>% 
+  group_by(Date) %>%
+  mutate(CPI_all=mean(CPI_all, na.rm = T)) %>% #in the original file the take the value of the last month of the quarter, here we take the average across the quarter 
+  ungroup() %>% 
+  dplyr::select(Date, CPI_all) %>% 
+  distinct()%>% 
+  as.data.frame() %>% 
+  mutate(CPI= CPI_all/last(CPI_all))# re-based to 100 LAST quarter, so variables are expressed in contemporaneous values
+
+HH_loan_rates<- merge.data.frame(HH_loan_rates, CPI_all, by='Date')
+HH_loan_rates<- HH_loan_rates %>% 
+  mutate(HH_loan_rates_r= HH_loan_rates-log(CPI))
+write.xlsx(HH_loan_rates, file = paste0(base_path,'/B_Data/HH_loan_rates.xlsx'))
+
+pHH_loan_rates_r<- ggplot(HH_loan_rates, aes(x=Date, y=HH_loan_rates_r))+
+  geom_line(size=1.5)+
+  geom_vline(xintercept = as.Date("2003-02-01"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
+  theme(legend.position="bottom",legend.title = element_text(size = 8)) +
+  scale_color_manual(values = c( "#5ab4ac"))+
+  ylab("HH real loan rates")+
+  guides(color = guide_legend(title = ""))+
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+
+pHH_loan_rates<- ggplot(HH_loan_rates, aes(x=Date, y=HH_loan_rates))+
+  geom_line(size=1.5)+
+  geom_vline(xintercept = as.Date("2003-02-01"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey"))+
+  theme(legend.position="bottom",legend.title = element_text(size = 8)) +
+  scale_color_manual(values = c( "#5ab4ac"))+
+  ylab("HH loan rates")+
+  guides(color = guide_legend(title = ""))+
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 50),
+        axis.text=element_text(size=50),
+        axis.title=element_text(size=50),
+        legend.text =element_text(size=50))
+ggsave(paste0(base_path,"/D_Results/Plots/Data/","pHH_loan_rates_r.pdf"), pHH_loan_rates_r, height = 20, width = 25)
+ggsave(paste0(base_path,"/D_Results/Plots/Data/", "pHH_loan_rates.pdf"), pHH_loan_rates, height = 20, width = 25)
+
+HHq <- HH_loan_rates %>%
+  mutate(yq = paste0(year(Date), "Q", quarter(Date))) %>%
+  group_by(yq) %>%
+  summarize(
+    Date = max(Date),                        
+    HH_loan_rates_r = mean(HH_loan_rates_r, na.rm = TRUE)) %>%
+  ungroup()
+data<-merge.data.frame(data, HHq, by = 'Date')
+write.xlsx(HHq, file=paste0(path,"/HH_loan_rates.xlsx"), rowNames = FALSE)
+
+
 #Descriptive statistics-------------------------------------
 df_selected <- data %>%
-  dplyr::select(Date, GNI_l_sa, Nat_cred_l_sa, rpp_price_index_l_sa)
-  
+  dplyr::select(Date, GNI_l_sa, Nat_cred_l_sa, rpp_price_index_l_sa,HH_loan_rates_r, CPI_all_q)
+
+df_selected <- df_selected %>%
+  mutate(CPI_all_q = (log(CPI_all_q) - log(lag(CPI_all_q, 4)))*100)%>%
+  filter(!is.infinite(CPI_all_q))
+
 stats_table <- data.frame(
-  Name = c("GNI", "National credit", "House prices"),
-  Description = "seasonally adjusted real terms",
+  Name = c("GNI", "National credit", "House prices", "Household Loan Rates",'CPI'),
+  Description = c(
+    "logarithms, seasonally adjusted, real terms",
+    "logarithms, seasonally adjusted, real terms",
+    "logarithms, seasonally adjusted, real terms",
+    "real terms",
+    "yoy log change"),
   Mean = c(mean(df_selected$GNI_l_sa, na.rm = TRUE),
            mean(df_selected$Nat_cred_l_sa, na.rm = TRUE),
-           mean(df_selected$rpp_price_index_l_sa, na.rm = TRUE)),
+           mean(df_selected$rpp_price_index_l_sa, na.rm = TRUE),
+           mean(df_selected$HH_loan_rates_r, na.rm = TRUE),
+           mean(df_selected$CPI_all_q, na.rm = TRUE)),
   SD = c(sd(df_selected$GNI_l_sa, na.rm = TRUE),
          sd(df_selected$Nat_cred_l_sa, na.rm = TRUE),
-         sd(df_selected$rpp_price_index_l_sa, na.rm = TRUE)),
+         sd(df_selected$rpp_price_index_l_sa, na.rm = TRUE),
+         sd(df_selected$HH_loan_rates_r, na.rm = TRUE),
+         sd(df_selected$CPI_all_q, na.rm = TRUE)),
   Max = c(max(df_selected$GNI_l_sa, na.rm = TRUE),
           max(df_selected$Nat_cred_l_sa, na.rm = TRUE),
-          max(df_selected$rpp_price_index_l_sa, na.rm = TRUE)),
+          max(df_selected$rpp_price_index_l_sa, na.rm = TRUE),
+          max(df_selected$HH_loan_rates_r, na.rm = TRUE),
+          max(df_selected$CPI_all_q, na.rm = TRUE)),
   Min = c(min(df_selected$GNI_l_sa, na.rm = TRUE),
           min(df_selected$Nat_cred_l_sa, na.rm = TRUE),
-          min(df_selected$rpp_price_index_l_sa, na.rm = TRUE)),
+          min(df_selected$rpp_price_index_l_sa, na.rm = TRUE),
+          min(df_selected$HH_loan_rates_r, na.rm = TRUE),
+          min(df_selected$CPI_all_q, na.rm = TRUE)),
   Period = paste0(format(min(df_selected$Date, na.rm = TRUE), "%Y-%m"),
                   " to ",
                   format(max(df_selected$Date, na.rm = TRUE), "%Y-%m")))
 
 write.xlsx(stats_table, file=paste0(base_path,"/D_Results/Tables/descriptive_statistics.xlsx"), rowNames = FALSE)
 
-
+#Key takeaway for the paper:
+cat("✅ Dispersion difference (pp), linear minus Chow–Lin interpolation:", sprintf("%.2f", chowlinvslinear), "\n",
+    "Interpretation: > 0 ⇒ Chow–Lin has lower dispersion than linear; ",
+    "< 0 ⇒ Chow–Lin has higher dispersion; = 0 ⇒ equal dispersion.\n", sep = "")
