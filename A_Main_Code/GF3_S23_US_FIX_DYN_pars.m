@@ -38,24 +38,24 @@ Label{3} = [ctry,': HPR'];
 %__________________________________________________________________________
 % Data - Pseudo Real Time 
 %__________________________________________________________________________
-global data_limit name_results;
-
-T = readtable(fullfile(Base_Dir,'data_model.csv'), ...
-              'ReadVariableNames', false, 'Delimiter', ',');
-
-DateStr = string(T{:,1});
-X       = T{:,2:4};       
-
-y = double(extractBefore(DateStr,'q'));
-q = double(extractAfter (DateStr,'q'));
-Date = [datenum(datetime(y, q*3, 1))];  % [datenum] 
-
-X = data(1:data_limit, :);
-data = data(1:data_limit, :);
-Date = Date(1:data_limit, 1);
-
-Ym   = data(13:end, 1:3);
-Date = Date(13:end, 1);
+% global data_limit name_results;
+% 
+% T = readtable(fullfile(Base_Dir,'data_model.csv'), ...
+%               'ReadVariableNames', false, 'Delimiter', ',');
+% 
+% DateStr = string(T{:,1});
+% X       = T{:,2:4};       
+% 
+% y = double(extractBefore(DateStr,'q'));
+% q = double(extractAfter (DateStr,'q'));
+% Date = [datenum(datetime(y, q*3, 1))];  % [datenum] 
+% 
+% X = data(1:data_limit, :);
+% data = data(1:data_limit, :);
+% Date = Date(1:data_limit, 1);
+% 
+% Ym   = data(13:end, 1:3);
+% Date = Date(13:end, 1);
 
 %__________________________________________________________________________
 % Model
@@ -378,5 +378,7 @@ graphs_mv_pres(Date,Ym,S.Z,R,R_s,M_,fpath,ctry);
  Results=[data(13:end,:),Trends, Cycles];
  writematrix(Results,strcat(Base_Dir, '\Outcome\Results_', name_results, '.xlsx'));
  
+ oneside_= Cycles_t.C00;
+ writematrix(oneside_,strcat(Base_Dir, '\Outcome\Results_', "oneside00", '.xlsx'));
  oneside_= Cycles_t.C20;
- writematrix(oneside_,strcat(Base_Dir, '\Outcome\Results_', "oneside", '.xlsx'));
+ writematrix(oneside_,strcat(Base_Dir, '\Outcome\Results_', "oneside20", '.xlsx'));
