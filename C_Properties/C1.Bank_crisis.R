@@ -43,21 +43,11 @@ save_plots <- paste0(base_path, '/D_Results/Plots/Bank_crisis')
 cbi_palette = c("#0B5471", "#7C477E", "#0083A0", "#5EC5C2", "#D2E288", "#007DC5", "#D12E7C", "#F57D20", "#FCAF17", "#DFCA94", "#000000", "#7e878e")
 
 ## Importing data-----------------------------------------------
-#Aggregated bank capital--------------
-  k_series = read_xlsx(paste0(base_path,"/B_Data/Raw_data/Bank_capital/Capital_Headroom.xlsx"), sheet = 'Capital_Headroom', range = "A2:R10000") %>% #This series is the realized one
-  mutate(Date = as.Date(as.yearqtr(Date, format = "%Yq%q"))) %>% 
-  mutate(RWA=AIB...7+BOI...8+PTSB...9,
-         Tot_CAP=AIB...10 +BOI...11 + PTSB...12,
-         Tot_T1=AIB...13 +BOI...14 + PTSB...15,
-         Tot_CET1=AIB...16 +BOI...17 + PTSB...18,
-         CAP_R= Tot_CAP/RWA,
-         T1_R= Tot_T1/RWA,
-         CET1_R= Tot_T1/RWA) %>% 
-  dplyr::select(Date, RWA, Tot_CAP, Tot_T1, Tot_CET1, CAP_R, T1_R, CET1_R) %>% 
-  as.data.frame()
-k_series<- k_series[!is.na(k_series$RWA),]
-
 #Aggregated assets from credit institutions--------------
+k_series <- data.frame(Date = seq.Date(as.Date("2002-10-01"), as.Date("2024-10-01"), by = "quarter"))
+k_series$full1<- rep(1, length(k_series[,1]))
+k_series$empty1<- c(rep(NA, 45), rep(1,89-45))
+
 assets<-openxlsx::read.xlsx("https://www.centralbank.ie/docs/default-source/statistics/data-and-analysis/credit-and-banking-statistics/bank-balance-sheets/bank-balance-sheets-data/ie_table_a-4_credit_institutions_-_aggregate_balance_sheet.xlsx?sfvrsn=2d49f1d_52", 
                   sheet ="Table A.4 - Assets", startRow = 12, colNames = F) %>% as.data.frame() %>% #in million
   mutate(Year=year(janitor::excel_numeric_to_date(X1))) %>% 
@@ -101,6 +91,7 @@ macro_data = read_csv(paste0(base_path, "/B_Data/data_full.csv")) %>%
 data<- merge.data.frame(k_series,assets, by="Date", all = T )
 data<- merge.data.frame(data,macro_data, by="Date", all = T )
 
+
 #Regression--------------
 data<- data %>%
   mutate(GNI_cl_yoy_2= (GNI_cl^2)/(lag(GNI_cl,4)^2)-1) %>% 
@@ -117,7 +108,6 @@ ols<- lm(data = data_reg, formula = assets_yoy ~ assets_yoy_1 +log_rpp_prices_yo
 summary_ols<- summary(ols)
 rsq <- summary(ols)$r.squared
 adj_rsq <- summary(ols)$adj.r.squared
-
 
 #Predict with 0.95 confidence intervals
 length_data<-length(data$assets_yoy)
@@ -337,3 +327,4 @@ cat(sprintf(
   "📄 Applying this rule with a 0.1%% threshold, we identify %d quarters in which the four-quarter moving average of qoq asset growth remained below the threshold for at least four consecutive quarters, compared with %d quarters when considering declines lasting at least two consecutive quarters.\n",
   below4, below2
 ))
+dummy_bcrisis_4q

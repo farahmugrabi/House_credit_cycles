@@ -42,19 +42,17 @@ Please download the following folders and scripts. The files and directories are
   - 📑 data_limit.mat (auxiliary structure)
   - 📂 Outcome (save results, empty)
   - 📂 Functions (utils, 43 auxiliary functions)
-  - 📈 data_model.xlsx (data) 
-  - 📂 Functions (util master codes)
 - 📂 **B.Data** (data generation)
   - 📑 0.Data.R
-  - 📈 data_pre.xlsx (data) 
   - 📂 Raw_data (data)
-    - 📂 Ban_capital: Assets_pre_2002.xlsx, Capital_Headroom.xlsx
-        - 📂 CBI_STATS: ie_table_a-4_credit_institutions_-_aggregate_balance_sheet.xlsx, Total Assets with Residency Breakdown_1992 to 2002.xlsx
-    - 📂 Crisis_indicators: Babecky_et_al._(2012).xlsx, fred_exchange_rate_IE.xlsx, Laeven_and_Valencia_(2020).xlsx 
+    - 📈 data_pre.xlsx (data) 
+    - 📂 Ban_capital: Assets_pre_2002.xlsx,
+    - 📂 Crisis_indicators: Babecky_et_al._(2012).xlsx, fred_exchange_rate_IE.xlsx, Laeven_and_Valencia_(2020).xlsx, Baron_Dieckelmann_Panics_and_bank_failures_database.xlsx,  
+    - 📂 Loan_Rates: b.1.2.xlsx
     - 📂 OBrien_Velasco: OBrienvelasco_results.xlsx 
 - 📂 **C.Properties** (Early warning and Real Time)
   - 📂 1.Crisis_events
-    - 📈 0.Crisis_indicator.xlsx (dummy crisis based on multiple sources) 
+    - 📈 0.Crisis_indicator.xlsx (dummy crisis based on multiple sources, need to update manually) 
   - 📑 C1.Bank_crisis.R (generation bank in distress dummies)
   - 📑 C2.Properties.R
 
@@ -68,8 +66,8 @@ Please download the following folders and scripts. The files and directories are
   - C.Properties/C1.Bank_crisis.R
   - C.Properties/C2.Properties.R
 5. Notes 📝:
-- 0.Data script updates data from different open source APIs.Data prior to the coverage of these APIs are provided by the Central Bank of Ireland and stored in the B.Data folder.
+- 0.Data script updates data from different open source APIs. Data prior to the coverage of these APIs are provided by the Central Bank of Ireland and stored in the B.Data folder.
 - Benchmark results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_main.xlsx.
 - One side results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_oneside.xlsx, this is used for real time and early warning properties.
-- There, Pseudo Real Time estimates section is commented. It is set to generate estimates recursively from quarter 100 to 197, this can be change in Master_Recursive.m, results are store in A.Main_Code/Outcome/Results_n__.xlsx.
-- O’Brien and Velasco estimates are obtained from the CBI, with the last available observation being 2024 Q4. If no current data are available, request the series or comment out the indicated lines in code C.2 Properties.R. The early warning assessment will be carried out up to the last date for which data are available for this model.
+- There, Pseudo Real Time estimates section is commented. It is set to generate estimates recursively from quarter x to y, this can be set in Master_Recursive.m, results are store in A.Main_Code/Outcome/Results_n__.xlsx.
+- O’Brien and Velasco estimates are obtained from the CBI, with the last available observation being 2024Q4. If no current data are available, request the series or comment out the indicated lines in code C.2 Properties.R. The early warning assessment will be carried out up to the last date for which data are available for this model.
