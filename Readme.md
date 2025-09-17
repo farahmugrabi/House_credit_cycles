@@ -67,7 +67,7 @@ Please download the following folders and scripts. The files and directories are
   - C.Properties/C2.Properties.R
 5. Notes 📝:
 - 0.Data script updates data from different open source APIs. Data prior to the coverage of these APIs are provided by the Central Bank of Ireland and stored in the B.Data folder.
-- Benchmark results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_main.xlsx.
+- Benchmark results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_main.xlsx. The order of the variables is the following: GNI, National Credit, House prices. First three columns data, second three columns Trend, last three columns cycles. Last data points correspond to the same date of the last data point of the file data_model.xlsx in A.Main_Code
 - One side results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_oneside20.xlsx, this is used for real time and early warning properties.
 - There, Pseudo Real Time estimates section is commented. It is set to generate estimates recursively from quarter x to y, this can be set in Master_Recursive.m, results are store in A.Main_Code/Outcome/Results_n__.xlsx.
 - O’Brien and Velasco estimates are obtained from the CBI, with the last available observation in 2024Q4. If no new data are available, request the series or comment out the relevant lines in C.2_Properties.R. As the early warning assessment relies on one-sided filters, the model remains usable until these estimates reach 2024Q4; beyond that, it requires updated data or exclusion.
