@@ -49,6 +49,7 @@ dir.create(file.path(base_path, "D_Results", "Plots", "Properties"), recursive =
 dir.create(file.path(base_path, "D_Results", "Plots","Properties", "Real_Time"), recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(base_path, "D_Results", "Plots","Properties", "VECM"), recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(base_path, "D_Results", "Plots","Properties", "Early_warning"), recursive = TRUE, showWarnings = FALSE)
+dir.create(file.path(base_path, "D_Results", "Plots","Properties", "Crisis_events"), recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(base_path,"D_Results", "Plots",  "Main_Results"), recursive = TRUE, showWarnings = FALSE)
 setwd(path)
 getwd()
@@ -293,41 +294,41 @@ CF_DIFF_RPP<- CF_DIFF_RPP %>%
         legend.text =element_text(size=50))
 ggsave(paste0(path_plots,  "/Real_time/CF_RPP_onevsfullsample.pdf"), CF_DIFF_RPP, height = 20, width = 25)
 
-#Plot: Pseudo real time (nd: new data points)
-start_date<- as.Date("2021-10-01")
-end_date<- last(data$Date)
-dates<-as.Date(as.yearqtr(seq.Date(start_date,end_date, by = '1 quarter')))
-minperiod<-c(8,32,32)
-maxperiod<-c(32, 120, 120)
-data_nd<-function(t){
-  data<- data %>% filter(Date<=dates[t])
-  cf_function<- function(s){
-    cf_filter<- cffilter(data[,var[s]],pl=minperiod[s],pu=maxperiod[s],root=T,drift=T, 
-                         type=c("asymmetric"), #other options: "symmetric","fixed","baxter-king","trigonometric" #see page 9 ECB Occasional paper real anf financial cycles in EU countries: stylised facts and modelling implications, #see also specification in function CF_FILTER here \\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\D_Translating_to_R\Runstler_Vlekke_2018\Models
-                         nfix=-1,
-                         theta=1)
-    cf_filter_results<- cbind(data[,c('Date',var[s])], data[,c(var[s])]-cf_filter$cycle, cf_filter$cycle)
-    colnames(cf_filter_results)<- c('Date',var[s], paste0("cf_trend_", var[s]), paste0("cf_cycle_", var[s]))
-    return(cf_filter_results)}
-  
-  var=c("GNI","NC", "RPP")
-  varpass<- list(1, 2, 3)
-  CF_Results_list<- lapply(varpass, cf_function)
-  CF_Results<- left_join(CF_Results_list[[1]], CF_Results_list[[2]])
-  CF_Results<- left_join(CF_Results, CF_Results_list[[3]])
-  return(CF_Results)
-}
-
-list_dates<- lapply(c(1:length(dates)), FUN = function(s)s)
-CF_nd_results<- lapply(list_dates, FUN=data_nd)
-
-name<-paste0("nd",c(1:length(dates)))
-nameworkbook<-paste0(base_path,"/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results_nd.xlsx")
-wb <- openxlsx::createWorkbook(nameworkbook)
-for (p in 1:length(dates)){
-  openxlsx::addWorksheet(wb,name[p])
-  openxlsx::writeData(wb, sheet = name[p], data.frame(CF_nd_results[[p]]))}
-openxlsx::saveWorkbook(wb, paste0(base_path,"/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results_nd.xlsx"), overwrite = TRUE)
+#Plot: Pseudo real time (nd: new data points) #@uncomment this section if you want to have the pseudo real time plots
+# start_date<- as.Date("2021-10-01")
+# end_date<- last(data$Date)
+# dates<-as.Date(as.yearqtr(seq.Date(start_date,end_date, by = '1 quarter')))
+# minperiod<-c(8,32,32)
+# maxperiod<-c(32, 120, 120)
+# data_nd<-function(t){
+#   data<- data %>% filter(Date<=dates[t])
+#   cf_function<- function(s){
+#     cf_filter<- cffilter(data[,var[s]],pl=minperiod[s],pu=maxperiod[s],root=T,drift=T, 
+#                          type=c("asymmetric"), #other options: "symmetric","fixed","baxter-king","trigonometric" #see page 9 ECB Occasional paper real anf financial cycles in EU countries: stylised facts and modelling implications, #see also specification in function CF_FILTER here \\Filescluster\shared\MPS\WORD\MPFS DEPT\Farah\Alternative_Gap\New_Model\Ruenstler_and_Vlekke_2018\D_Translating_to_R\Runstler_Vlekke_2018\Models
+#                          nfix=-1,
+#                          theta=1)
+#     cf_filter_results<- cbind(data[,c('Date',var[s])], data[,c(var[s])]-cf_filter$cycle, cf_filter$cycle)
+#     colnames(cf_filter_results)<- c('Date',var[s], paste0("cf_trend_", var[s]), paste0("cf_cycle_", var[s]))
+#     return(cf_filter_results)}
+#   
+#   var=c("GNI","NC", "RPP")
+#   varpass<- list(1, 2, 3)
+#   CF_Results_list<- lapply(varpass, cf_function)
+#   CF_Results<- left_join(CF_Results_list[[1]], CF_Results_list[[2]])
+#   CF_Results<- left_join(CF_Results, CF_Results_list[[3]])
+#   return(CF_Results)
+# }
+# 
+# list_dates<- lapply(c(1:length(dates)), FUN = function(s)s)
+# CF_nd_results<- lapply(list_dates, FUN=data_nd)
+# 
+# name<-paste0("nd",c(1:length(dates)))
+# nameworkbook<-paste0(base_path,"/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results_nd.xlsx")
+# wb <- openxlsx::createWorkbook(nameworkbook)
+# for (p in 1:length(dates)){
+#   openxlsx::addWorksheet(wb,name[p])
+#   openxlsx::writeData(wb, sheet = name[p], data.frame(CF_nd_results[[p]]))}
+# openxlsx::saveWorkbook(wb, paste0(base_path,"/D_Results/Alternative_estimates/ChristianoFitzgeraldt_results_nd.xlsx"), overwrite = TRUE)
 
 #A.2-VECM-----------------------------------------------------------------------#Johansen Test for Cointegration >  https://www.r-bloggers.com/2021/12/vector-error-correction-model-vecm-using-r/ #the maximum eigenvalue test : H0 : There are r cointegrating vectors // H1 : There are r + 1 cointegrating vectors
 #Loan rates data----------------------------------
@@ -736,7 +737,7 @@ fx_trend<- ggplot(var_decomp,aes(x=Date,y= hp_trend_FX, color='Trend (HP)'))+geo
         axis.text=element_text(size=50),
         axis.title=element_text(size=50),
         legend.text =element_text(size=50))
-ggsave(paste0(path_plots,"/Crisis_Events/fx",".pdf"), fx_trend, height = 20, width = 25)
+ggsave(paste0(path_plots, "/Crisis_events/fx.pdf"), fx_trend, height = 20, width = 25)
 
 nameworkbook<- paste0(path,"/1.Crisis_events/fx_filtered.xlsx")
 wb <- openxlsx::createWorkbook(nameworkbook)
@@ -787,6 +788,8 @@ systemic_crisisplot<- ggplot(plot_data, aes(x=Date,y=Crisis))+
         legend.text =element_text(size=50))+
   scale_fill_manual(values = c('#FCAF17','#0083A0'))
 ggsave(paste0(path_plots,"/Crisis_events/systemic_crisisplot",".pdf"), systemic_crisisplot, height = 20, width = 25)
+
+paste0(base_path, "/D_Results/Plots/Bank_crisis/fx.pdf")
 
 #Systemic crisis dummy: Like the first one but excluding Baron and Dieckelmann (2022), why because these authors add banks disruptions (Bank Eq. 30% decline) not associated to bank panic nor crisis. Separately, we are going to analyze this when we work with the substantial drops in assets, i.e. crisis dummy 3 onward (Banking Crisis indicator)
 data_crisis[[2]]<-openxlsx::read.xlsx(paste0(path, "/1.Crisis_events/0.Crisis_indicator.xlsx"), sheet="Crisis") %>% 
@@ -1259,127 +1262,127 @@ plot_f<- function(m){
   }
 lapply(list_indicator,plot_f)
 
-#3-Pseudo Real time estimates: New data points (nd)-----------------------------
-limits_recursive_master<-100:198 #@Select according to the A.Main.Code/Master_Recursive.m
-name_files<- c('GNI', 'NC', 'RPP')
-files <- sprintf(paste0(base_path,"/A_Main_Code/Outcome/Results_n%d.xlsx"),limits_recursive_master )
-cn <- sub("\\.xlsx$", "", files)
-
-first_date<- read.csv(paste0(base_path,"/A_Main_Code/data_model.csv"), header = F)[1,1]
-make_dates <- function(first_date, n){
-  p <- strsplit(first_date, "q")[[1]]
-  y <- as.integer(p[1]); q <- as.integer(p[2])
-  out <- character(n)
-  for(i in 1:n){
-    out[i] <- sprintf("%dq%d", y, q)
-    q <- q + 1
-    if(q == 5){ q <- 1; y <- y + 1 }}
-  out}
-dates_recursive <- make_dates(first_date, 198)[limits_recursive_master]
-
-to_date <- function(qstr){                     
-  p <- strsplit(qstr, "q")[[1]]                 
-  y <- as.integer(p[1]); q <- as.integer(p[2])  
-  m <- c("01","04","07","10")[q]               
-  as.Date(paste0(y,"-",m,"-01"))}
-
-first_date_estim <- seq(as.yearqtr(first_date, format = "%Yq%q"),
-                        length.out = 14, by = 1/4) %>% last() %>% format("%Yq%q") #@Check first date benchmark model, normally we have a burn in period of 13 quarters (13+1), see A_Main_Code> GF3_S23_US_FIX_DYN_pars: Ym= X(13:end,1:3) 
-limits_estim<- max(limits_recursive_master)-13#@Check first date benchmark model, normally we have a burn in period of 13 quarters (13), see A_Main_Code> GF3_S23_US_FIX_DYN_pars: Ym= X(13:end,1:3)
-dates_all_chr  <- make_dates(first_date_estim, limits_estim)   
-dates_all_date <- as.Date(sapply(dates_all_chr, to_date))                      
-
-read_col <- function(k){
-  lst <- lapply(files, function(f) read_excel(f, col_types = "guess")[[k]])
-  names(lst) <- cn
-  m <- max(lengths(lst))
-  df<- as.data.frame(lapply(lst, function(v){ length(v) <- m; v }), check.names = FALSE)
-  df <- cbind(Date = dates_all_date[seq_len(nrow(df))], df)  
-  colnames(df) <- c("Date", dates_recursive)
-  q_str <- dates_all_date %>% last() %>% as.yearqtr() %>% { . - 12/4 } %>% format("%Yq%q")#@select last date for plot pseudo real time, recommended leave 12 quarters (~burning period) before the last date, bind cols and Date cols with the same date
-  keep_q <- names(df)
-  keep_q <- keep_q[grepl("^[0-9]{4}q[1-4]$", keep_q)]
-  keep_q <- keep_q[as.yearqtr(keep_q, "%Yq%q") <= as.yearqtr(q_str, "%Yq%q")] 
-  df <- df %>%
-    filter(Date <= as.Date(as.yearqtr(q_str, "%Yq%q")))%>%
-    dplyr::select(Date, all_of(keep_q))                 
-  return(df)}
-recursivedata<-list(read_col(7),read_col(8),read_col(9))
-name_plot<- c('business cycle','credit cycle', 'house prices cycle')
-ind<-c(which(indicator==c("Benchmark_GNI")),which(indicator==c("Benchmark_NC")),which(indicator==c("Benchmark_RPP")))
-
-new_data_plot_f<- function(c){
-  merged_df<- recursivedata[[c]] %>% 
-    mutate(Date=as.Date(Date))
-  date_seq  <- as.Date(as.yearqtr(sub("q"," Q", colnames(merged_df)[-1]), format = "%Y Q%q"))
-  date_names <- as.character(as.yearqtr(date_seq, format = "%Y Q%q"))
-  colnames(merged_df) <- c("Date", date_names)
- 
-  breaks_ <- as.yearqtr(
-    rev(seq(max(merged_df$Date, na.rm = TRUE),
-            min(merged_df$Date, na.rm = TRUE),
-            by = -3000)),
-    format = '%Y Q%q')
-  
-  if(indicator[ind][c]=="Benchmark_GNI"){
-    min_scaling<-min(data_ew[,indicator[ind][c]], na.rm = T)
-    max_scaling<-max(data_ew[,indicator[ind][c]]-min_scaling, na.rm = T)
-    benchmark_threshold=0
-    benchmark_threshold_lb=0
-    benchmark_threshold_ub=0
-  }else{
-    min_scaling<-min(data_ew[,indicator[ind][c]], na.rm = T)
-    max_scaling<-max(data_ew[,indicator[ind][c]]-min_scaling, na.rm = T)
-    benchmark_threshold<-  (all_thresholds_crisis_fullsample[[ind[c]]][[1]]*max_scaling)+min_scaling #full sample estimates threshold
-    benchmark_threshold_lb<-(all_thresholds_crisis_fullsample[[ind[c]]][[2]]*max_scaling)+min_scaling 
-    benchmark_threshold_ub<-(all_thresholds_crisis_fullsample[[ind[c]]][[3]]*max_scaling)+min_scaling}
-
-  max_V<- max(merged_df[, -1], na.rm = T)
-  min_V<- min(merged_df[, -1], na.rm = T)
-  pre_crisis<- data_crisis[[2]] %>% dplyr::select(c('Date', "Pre_crisis")) %>% 
-    mutate(Pre_crisis=ifelse(Pre_crisis==1, max_V,min_V))
-  gfc_crisis<- data_crisis[[2]] %>% dplyr::select(c('Date', "Crisis")) %>% 
-    filter(Date>='2007-01-01') %>% 
-    filter(Crisis==1) %>% 
-    first() %>% 
-    dplyr::select(Date) %>% 
-    mutate(Date=as.yearqtr(as.Date(Date), format = '%Y Q%q'))
-  
-  merged_df<- merge.data.frame(pre_crisis, merged_df, by='Date', all = F)
-
-  merged_df<-merged_df %>%
-    mutate(Date= as.yearqtr(Date)) %>% 
-    pivot_longer(cols=date_names ,names_to = "variable", values_to = "value")
-  
-  plot_<- merged_df %>% 
-    ggplot()+ 
-    geom_line(aes(x=Date, y=value, colour = variable))+
-    geom_line(aes(x=Date, y=Pre_crisis, colour = "Pre_crisis"))+
-    theme_classic() +
-    labs(x = "Quarter",y = "log", title = "")+
-    scale_color_manual(values = c('grey', colorRampPalette(c("#F57D20", "#000000"))(length(date_names))), name='',
-                       breaks = c('Pre_crisis', as.yearqtr(last(date_names))), labels = c("Pre_crisis",name_plot[c]))+
-    scale_x_yearqtr(format = "%YQ%q", breaks=breaks_)+
-    # coord_cartesian(xlim = c(min(merged_df$Date), max(merged_df$Date)))+
-    guides(fill=guide_legend(title=""))+
-    geom_hline(yintercept = benchmark_threshold, colour =  '#0083A0', linetype='dotted', linewidth = 1.5)+#AMEND THREHSOLD
-    geom_hline(yintercept = benchmark_threshold_lb, colour ='#FCAF17', linetype='dotted', linewidth = 1.5)+
-    geom_hline(yintercept = benchmark_threshold_ub, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
-    geom_vline(xintercept =as.yearqtr(gfc_crisis, format = '%Y Q%q') , colour = cbi_palette[7], linetype='dashed', linewidth = 1.1)+
-    theme(legend.position = "bottom",
-          plot.title = element_text(size = 50),
-          axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
-          axis.text=element_text(size=50),
-          axis.title=element_text(size=50),
-          text=element_text(size=50),
-          legend.text =element_text(size=50))+
-    annotate("rect", xmin = date_names[1], xmax = last(date_names),
-             ymin=-Inf, ymax=Inf, fill='gray', alpha=0.8)
-
-  ggsave(paste0(path_plots,"/Real_Time/pseudo_rt_",name_files[c], ".pdf"), plot_, height = 20, width = 25)
-  }
-list_vars<- lapply(c(1:3), FUN = function(s)s)
-lapply(list_vars,new_data_plot_f)
+#3-Pseudo Real time estimates: New data points (nd) @unncomment for real time estimate-----------------------------
+# limits_recursive_master<-100:198 #@Select according to the A.Main.Code/Master_Recursive.m
+# name_files<- c('GNI', 'NC', 'RPP')
+# files <- sprintf(paste0(base_path,"/A_Main_Code/Outcome/Results_n%d.xlsx"),limits_recursive_master )
+# cn <- sub("\\.xlsx$", "", files)
+# 
+# first_date<- read.csv(paste0(base_path,"/A_Main_Code/data_model.csv"), header = F)[1,1]
+# make_dates <- function(first_date, n){
+#   p <- strsplit(first_date, "q")[[1]]
+#   y <- as.integer(p[1]); q <- as.integer(p[2])
+#   out <- character(n)
+#   for(i in 1:n){
+#     out[i] <- sprintf("%dq%d", y, q)
+#     q <- q + 1
+#     if(q == 5){ q <- 1; y <- y + 1 }}
+#   out}
+# dates_recursive <- make_dates(first_date, 198)[limits_recursive_master]
+# 
+# to_date <- function(qstr){                     
+#   p <- strsplit(qstr, "q")[[1]]                 
+#   y <- as.integer(p[1]); q <- as.integer(p[2])  
+#   m <- c("01","04","07","10")[q]               
+#   as.Date(paste0(y,"-",m,"-01"))}
+# 
+# first_date_estim <- seq(as.yearqtr(first_date, format = "%Yq%q"),
+#                         length.out = 14, by = 1/4) %>% last() %>% format("%Yq%q") #@Check first date benchmark model, normally we have a burn in period of 13 quarters (13+1), see A_Main_Code> GF3_S23_US_FIX_DYN_pars: Ym= X(13:end,1:3) 
+# limits_estim<- max(limits_recursive_master)-13#@Check first date benchmark model, normally we have a burn in period of 13 quarters (13), see A_Main_Code> GF3_S23_US_FIX_DYN_pars: Ym= X(13:end,1:3)
+# dates_all_chr  <- make_dates(first_date_estim, limits_estim)   
+# dates_all_date <- as.Date(sapply(dates_all_chr, to_date))                      
+# 
+# read_col <- function(k){
+#   lst <- lapply(files, function(f) read_excel(f, col_types = "guess")[[k]])
+#   names(lst) <- cn
+#   m <- max(lengths(lst))
+#   df<- as.data.frame(lapply(lst, function(v){ length(v) <- m; v }), check.names = FALSE)
+#   df <- cbind(Date = dates_all_date[seq_len(nrow(df))], df)  
+#   colnames(df) <- c("Date", dates_recursive)
+#   q_str <- dates_all_date %>% last() %>% as.yearqtr() %>% { . - 12/4 } %>% format("%Yq%q")#@select last date for plot pseudo real time, recommended leave 12 quarters (~burning period) before the last date, bind cols and Date cols with the same date
+#   keep_q <- names(df)
+#   keep_q <- keep_q[grepl("^[0-9]{4}q[1-4]$", keep_q)]
+#   keep_q <- keep_q[as.yearqtr(keep_q, "%Yq%q") <= as.yearqtr(q_str, "%Yq%q")] 
+#   df <- df %>%
+#     filter(Date <= as.Date(as.yearqtr(q_str, "%Yq%q")))%>%
+#     dplyr::select(Date, all_of(keep_q))                 
+#   return(df)}
+# recursivedata<-list(read_col(7),read_col(8),read_col(9))
+# name_plot<- c('business cycle','credit cycle', 'house prices cycle')
+# ind<-c(which(indicator==c("Benchmark_GNI")),which(indicator==c("Benchmark_NC")),which(indicator==c("Benchmark_RPP")))
+# 
+# new_data_plot_f<- function(c){
+#   merged_df<- recursivedata[[c]] %>% 
+#     mutate(Date=as.Date(Date))
+#   date_seq  <- as.Date(as.yearqtr(sub("q"," Q", colnames(merged_df)[-1]), format = "%Y Q%q"))
+#   date_names <- as.character(as.yearqtr(date_seq, format = "%Y Q%q"))
+#   colnames(merged_df) <- c("Date", date_names)
+#  
+#   breaks_ <- as.yearqtr(
+#     rev(seq(max(merged_df$Date, na.rm = TRUE),
+#             min(merged_df$Date, na.rm = TRUE),
+#             by = -3000)),
+#     format = '%Y Q%q')
+#   
+#   if(indicator[ind][c]=="Benchmark_GNI"){
+#     min_scaling<-min(data_ew[,indicator[ind][c]], na.rm = T)
+#     max_scaling<-max(data_ew[,indicator[ind][c]]-min_scaling, na.rm = T)
+#     benchmark_threshold=0
+#     benchmark_threshold_lb=0
+#     benchmark_threshold_ub=0
+#   }else{
+#     min_scaling<-min(data_ew[,indicator[ind][c]], na.rm = T)
+#     max_scaling<-max(data_ew[,indicator[ind][c]]-min_scaling, na.rm = T)
+#     benchmark_threshold<-  (all_thresholds_crisis_fullsample[[ind[c]]][[1]]*max_scaling)+min_scaling #full sample estimates threshold
+#     benchmark_threshold_lb<-(all_thresholds_crisis_fullsample[[ind[c]]][[2]]*max_scaling)+min_scaling 
+#     benchmark_threshold_ub<-(all_thresholds_crisis_fullsample[[ind[c]]][[3]]*max_scaling)+min_scaling}
+# 
+#   max_V<- max(merged_df[, -1], na.rm = T)
+#   min_V<- min(merged_df[, -1], na.rm = T)
+#   pre_crisis<- data_crisis[[2]] %>% dplyr::select(c('Date', "Pre_crisis")) %>% 
+#     mutate(Pre_crisis=ifelse(Pre_crisis==1, max_V,min_V))
+#   gfc_crisis<- data_crisis[[2]] %>% dplyr::select(c('Date', "Crisis")) %>% 
+#     filter(Date>='2007-01-01') %>% 
+#     filter(Crisis==1) %>% 
+#     first() %>% 
+#     dplyr::select(Date) %>% 
+#     mutate(Date=as.yearqtr(as.Date(Date), format = '%Y Q%q'))
+#   
+#   merged_df<- merge.data.frame(pre_crisis, merged_df, by='Date', all = F)
+# 
+#   merged_df<-merged_df %>%
+#     mutate(Date= as.yearqtr(Date)) %>% 
+#     pivot_longer(cols=date_names ,names_to = "variable", values_to = "value")
+#   
+#   plot_<- merged_df %>% 
+#     ggplot()+ 
+#     geom_line(aes(x=Date, y=value, colour = variable))+
+#     geom_line(aes(x=Date, y=Pre_crisis, colour = "Pre_crisis"))+
+#     theme_classic() +
+#     labs(x = "Quarter",y = "log", title = "")+
+#     scale_color_manual(values = c('grey', colorRampPalette(c("#F57D20", "#000000"))(length(date_names))), name='',
+#                        breaks = c('Pre_crisis', as.yearqtr(last(date_names))), labels = c("Pre_crisis",name_plot[c]))+
+#     scale_x_yearqtr(format = "%YQ%q", breaks=breaks_)+
+#     # coord_cartesian(xlim = c(min(merged_df$Date), max(merged_df$Date)))+
+#     guides(fill=guide_legend(title=""))+
+#     geom_hline(yintercept = benchmark_threshold, colour =  '#0083A0', linetype='dotted', linewidth = 1.5)+#AMEND THREHSOLD
+#     geom_hline(yintercept = benchmark_threshold_lb, colour ='#FCAF17', linetype='dotted', linewidth = 1.5)+
+#     geom_hline(yintercept = benchmark_threshold_ub, colour = '#FCAF17', linetype='dotted', linewidth = 1.5)+
+#     geom_vline(xintercept =as.yearqtr(gfc_crisis, format = '%Y Q%q') , colour = cbi_palette[7], linetype='dashed', linewidth = 1.1)+
+#     theme(legend.position = "bottom",
+#           plot.title = element_text(size = 50),
+#           axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1),
+#           axis.text=element_text(size=50),
+#           axis.title=element_text(size=50),
+#           text=element_text(size=50),
+#           legend.text =element_text(size=50))+
+#     annotate("rect", xmin = date_names[1], xmax = last(date_names),
+#              ymin=-Inf, ymax=Inf, fill='gray', alpha=0.8)
+# 
+#   ggsave(paste0(path_plots,"/Real_Time/pseudo_rt_",name_files[c], ".pdf"), plot_, height = 20, width = 25)
+#   }
+# list_vars<- lapply(c(1:3), FUN = function(s)s)
+# lapply(list_vars,new_data_plot_f)
 
 #Plot composite indicator - thresholds adjusted (min max RPP and NC cycles)
 data_roc<- merge(data_crisis[[2]], data_cycles, by='Date')#pre crisis periods
@@ -1508,6 +1511,38 @@ plotfincycles<-dt %>%  mutate(Date= as.yearqtr(Date)) %>%
         axis.title=element_text(size=50),
         legend.text =element_text(size=50))
 ggsave(paste0(base_path,"/D_Results/Plots/Main_Results/main_results_fin_cycles.pdf"), plotfincycles, height = 20, width = 25)
+
+#Standard gap following ESRB 2014 Recommendation, not presented in the paper. 
+#This measure takes the total credit to GDP, for IE in the paper we use National credit to GNI, following the same estimation method
+#One sided filter with standard gap data
+datastg<- openxlsx::read.xlsx(paste0(base_path, "/B_Data/data_standard_gap.xlsx")) %>% 
+  mutate(Date=convertToDate(Date)) 
+data<-datastg["credit_to_gdp"] %>% na.omit()
+dates<-datastg %>% na.omit()
+dates<-dates[,1]
+
+l_hp <- length(as.data.frame(datastg)[,1])
+  hp_cycle <- rep(0,l_hp)
+  hp_trend <- rep(0,l_hp)
+  hpfilter_40 <- hpfilter(as.data.frame(data)[1:(40),],type ='lambda' ,freq = 400000) #Burn in period
+  hp_cycle[1:40] <- hpfilter_40$cycle
+  hp_trend[1:40] <- hpfilter_40$trend
+  for(i in 1:(l_hp-40)){
+    hpfilter_40 <- hpfilter(as.data.frame(data)[1:(40+i),] ,type ='lambda', freq = 400000) #Expanded window
+    hp_cycle[40+i] <- hpfilter_40$cycle[i+40]
+    hp_trend[40+i] <- hpfilter_40$trend[i+40]
+  }
+standardgap_estimate<-as.data.frame(cbind(data, hp_trend, hp_cycle)) %>% 
+    cbind(., dates)
+colnames(standardgap_estimate)<- c('Data', "hp_trend", "hp_cycle", 'Date')
+
+nameworkbook<- paste0(base_path,"/D_Results/Alternative_estimates/standard_gap_hodrickprescott_results.xlsx")
+wb <- openxlsx::createWorkbook(nameworkbook)
+openxlsx::addWorksheet(wb,'CF')
+openxlsx::writeData(wb, sheet = 'CF', data.frame(standardgap_estimate))
+openxlsx::saveWorkbook(wb, paste0(base_path,"/D_Results/Alternative_estimates/standard_gap_hodrickprescott_results.xlsx"), overwrite = TRUE)
+
+
 
 #Key takeaway for the paper:
 cat(sprintf(
