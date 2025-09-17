@@ -1532,6 +1532,9 @@ l_hp <- length(as.data.frame(datastg)[,1])
     hp_cycle[40+i] <- hpfilter_40$cycle[i+40]
     hp_trend[40+i] <- hpfilter_40$trend[i+40]
   }
+  
+hp_trend<-as.data.frame(hp_trend) %>% na.omit()
+hp_cycle<-as.data.frame(hp_cycle) %>% na.omit()
 standardgap_estimate<-as.data.frame(cbind(data, hp_trend, hp_cycle)) %>% 
     cbind(., dates)
 colnames(standardgap_estimate)<- c('Data', "hp_trend", "hp_cycle", 'Date')
