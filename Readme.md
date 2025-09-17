@@ -62,7 +62,7 @@ Please download the following folders and scripts. The files and directories are
 3. Follow @ to locate configurable options.
 4. Run ▶️ the scripts in the following order:
   - B.Data/0.Data.R
-  - A.Main_Code/GF3_S23_US_FIX_DYN_pars
+  - A.Main_Code/GF3_S23_US_FIX_DYN_pars.m
   - C.Properties/C1.Bank_crisis.R
   - C.Properties/C2.Properties.R
 5. Notes 📝:
@@ -71,3 +71,6 @@ Please download the following folders and scripts. The files and directories are
 - One side results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_oneside20.xlsx, this is used for real time and early warning properties.
 - There, Pseudo Real Time estimates section is commented. It is set to generate estimates recursively from quarter x to y, this can be set in Master_Recursive.m, results are store in A.Main_Code/Outcome/Results_n__.xlsx.
 - O’Brien and Velasco estimates are obtained from the CBI, with the last available observation in 2024Q4. If no new data are available, request the series or comment out the relevant lines in C.2_Properties.R. As the early warning assessment relies on one-sided filters, the model remains usable until these estimates reach 2024Q4; beyond that, it requires updated data or exclusion.
+- For the pseudo real time estimates charts, include this extra step: 
+   - After running: A.Main_Code/GF3_S23_US_FIX_DYN_pars.m, run A.Main_Code/Master_Recursive.m
+   - Uncomment C.Properties/C2.Properties.R, section #Plot: Pseudo real time (nd: new data points) and section #3-Pseudo Real time estimates:
