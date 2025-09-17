@@ -245,7 +245,7 @@ NFC_credit_national$Data.type<- NFC_credit_national$`Data Type`
 NFC_credit_national$Reporting.Date<- NFC_credit_national$`Reporting Date`
 
 NFC_credit_national<- NFC_credit_national %>% 
-  filter(Data.type=="Outstanding Amount", Item=='Credit to Non Financial Corporates, Irish Resident, Total ') %>% 
+  filter(Data.type=="Outstanding Amount", Item=='Credit to Non Financial Corporates, Irish Resident, Total') %>% 
   dplyr::select(Reporting.Date,Value) %>% 
   rename(NFC_credit_national=Value, Month=Reporting.Date) %>% 
   mutate(Month = as.Date(Month)) %>% 
@@ -575,7 +575,6 @@ data_standardg<- data %>%
   mutate(credit_to_gdp= Total_credit*100/GDP_y )
 
 write.xlsx(data_standardg, file=paste0(path,"/data_standard_gap.xlsx"), rowNames = FALSE)
-
 
 #Key takeaway for the paper:
 cat("✅ Dispersion difference (pp), linear minus Chow–Lin interpolation:", sprintf("%.2f", chowlinvslinear), "\n",
