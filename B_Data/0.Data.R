@@ -239,10 +239,13 @@ NFC_credit_total<- read.csv("https://data-api.ecb.europa.eu/service/data/QSA/Q.N
 data_credit<- merge(data_credit,NFC_credit_total, by = "Date", all = T)
 
 #National Credit (provided by domestic banks)-------------
-NFC_credit_national<- read.csv("https://opendata.centralbank.ie/dataset/f178f1ef-6be3-4377-8441-433e3531c11f/resource/ea2149b9-3429-4f9f-ab4f-99803f32b537/download/money-and-banking-statistics.csv")
+# NFC_credit_national<- read.csv("https://opendata.centralbank.ie/dataset/f178f1ef-6be3-4377-8441-433e3531c11f/resource/ea2149b9-3429-4f9f-ab4f-99803f32b537/download/money-and-banking-statistics.csv")
+NFC_credit_national<- readr::read_csv("https://opendata.centralbank.ie/dataset/f178f1ef-6be3-4377-8441-433e3531c11f/resource/ea2149b9-3429-4f9f-ab4f-99803f32b537/download/money-and-banking-statistics.csv")
+NFC_credit_national$Data.type<- NFC_credit_national$`Data Type`
+NFC_credit_national$Reporting.Date<- NFC_credit_national$`Reporting Date`
 
 NFC_credit_national<- NFC_credit_national %>% 
-  filter(Data.Type=="Outstanding Amount", Item=='Credit to Non Financial Corporates, Irish Resident, Total ') %>% 
+  filter(Data.type=="Outstanding Amount", Item=='Credit to Non Financial Corporates, Irish Resident, Total ') %>% 
   dplyr::select(Reporting.Date,Value) %>% 
   rename(NFC_credit_national=Value, Month=Reporting.Date) %>% 
   mutate(Month = as.Date(Month)) %>% 
@@ -541,6 +544,38 @@ stats_table <- data.frame(
                   format(max(df_selected$Date, na.rm = TRUE), "%Y-%m")))
 
 write.xlsx(stats_table, file=paste0(base_path,"/D_Results/Tables/descriptive_statistics.xlsx"), rowNames = FALSE)
+
+#Data standard gap (BIS/ESRB 2014 recommendation)--------------
+gdp = cso_get_data('NAQ03', pivot_format = "tall", use_dates = TRUE, use_factors = FALSE, cache = FALSE) %>% 
+  filter(Statistic=='GDP at Current Market Prices (Seasonally Adjusted)')%>%
+  rename(Date=Year) %>% 
+  mutate(Date = as.Date(Date)) %>%
+  dplyr::select(Date,value) %>% 
+  rename(GDP=value) %>% 
+  mutate(GDP = as.numeric(GDP)) %>%
+  mutate(GDP_y= rollapply(data = GDP, width = 4, FUN =sum,align = "right", fill = NA,na.rm = TRUE)) %>% 
+  mutate(GDP_y= GDP_y/1000) %>% 
+  as.data.frame() %>% 
+  dplyr::select(c("Date", 'GDP_y')) %>% 
+  filter(Date>="1995-10-01") 
+
+#Source: Central Bank of Ireland - Macro Financial Division (MFD) - gdp_Haver.xlsx - Sheet: GNIstar_adjustment - Column A: gdp_q
+GNI_pre_1997<- readxl::read_xlsx(paste0(path,"/Raw_Data/", "Data_pre.xlsx"),sheet='Quarterly', range = "A1:F10000")  %>% 
+  mutate(Date = as.Date(as.yearqtr(Date, format = "%Y-Q%q"))) %>% 
+  mutate(GDP_y = GDP_pre_1997/400) %>% 
+  dplyr::select(Date,GDP_y) %>% 
+  filter(Date<="1995-07-01") %>% 
+  as.data.frame()
+
+gdp<- rbind(GNI_pre_1997[,c('Date', "GDP_y")],gdp)
+data_standardg<- data %>% 
+  dplyr::select("Date","NFC_credit_total", "HH_credit_total") %>% 
+  merge.data.frame(.,gdp) %>% 
+  mutate(Total_credit= NFC_credit_total+HH_credit_total) %>% 
+  mutate(credit_to_gdp= Total_credit*100/GDP_y )
+
+write.xlsx(data_standardg, file=paste0(path,"/data_standard_gap.xlsx"), rowNames = FALSE)
+
 
 #Key takeaway for the paper:
 cat("✅ Dispersion difference (pp), linear minus Chow–Lin interpolation:", sprintf("%.2f", chowlinvslinear), "\n",
