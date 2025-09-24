@@ -687,6 +687,11 @@ bm_sd_hp_ratio <- sd_ratio(diff_RPP_benchmark$Diff, diff_RPP_benchmark$Benchmark
 bm_sd_nc_raw   <- sd(diff_NC_benchmark$Diff, na.rm = TRUE)
 bm_sd_hp_raw   <- sd(diff_RPP_benchmark$Diff, na.rm = TRUE)
 
+bm_sd_nc_full_raw   <- sd(diff_NC_benchmark$Benchmark_NC_fullsample, na.rm = TRUE)
+bm_sd_nc_one_raw   <- sd(diff_NC_benchmark$Benchmark_NC_onesided, na.rm = TRUE)
+bm_sd_hp_full_raw   <- sd(diff_RPP_benchmark$Benchmark_RPP_fullsample, na.rm = TRUE)
+bm_sd_hp_one_raw   <- sd(diff_RPP_benchmark$Benchmark_RPP_onesided, na.rm = TRUE)
+
 # --- CF Filter ---
 cf_corr_nc <- corr_co(CF_credit$CF_NC_fullsample, CF_credit$CF_NC_onesided)
 cf_corr_hp <- corr_co(CF_RPP$CF_RPP_fullsample, CF_RPP$CF_RPP_onesided)
@@ -697,6 +702,12 @@ cf_sd_hp_ratio <- sd_ratio(CF_RPP$Diff, CF_RPP$CF_RPP_onesided)
 cf_sd_nc_raw   <- sd(CF_credit$Diff, na.rm = TRUE)
 cf_sd_hp_raw   <- sd(CF_RPP$Diff, na.rm = TRUE)
 
+cf_sd_nc_full_raw   <- sd(CF_credit$CF_NC_fullsample, na.rm = TRUE)
+cf_sd_nc_one_raw   <- sd(CF_credit$CF_NC_onesided, na.rm = TRUE)
+cf_sd_hp_full_raw   <- sd(CF_RPP$CF_RPP_fullsample, na.rm = TRUE)
+cf_sd_hp_one_raw   <- sd(CF_RPP$CF_RPP_onesided, na.rm = TRUE)
+
+
 # --- HP Filter ---
 hp_corr_nc <- corr_co(HP_credit$HP_NC_fullsample, HP_credit$HP_NC_onesided)
 hp_corr_hp <- corr_co(HP_RPP$HP_RPP_fullsample, HP_RPP$HP_RPP_onesided)
@@ -706,6 +717,12 @@ hp_sd_nc_ratio <- sd_ratio(HP_credit$Diff, HP_credit$HP_NC_onesided)
 hp_sd_hp_ratio <- sd_ratio(HP_RPP$Diff, HP_RPP$HP_RPP_onesided)
 hp_sd_nc_raw   <- sd(HP_credit$Diff, na.rm = TRUE)
 hp_sd_hp_raw   <- sd(HP_RPP$Diff, na.rm = TRUE)
+
+hp_sd_nc_full_raw   <- sd(HP_credit$HP_NC_fullsample, na.rm = TRUE)
+hp_sd_nc_one_raw   <- sd(HP_credit$HP_NC_onesided, na.rm = TRUE)
+hp_sd_hp_full_raw   <- sd(HP_RPP$HP_RPP_fullsample, na.rm = TRUE)
+hp_sd_hp_one_raw   <- sd(HP_RPP$HP_RPP_onesided, na.rm = TRUE)
+
 
 results_tbl <- tibble(
   Model       = c("Benchmark", "CF Filter", "HP Filter"),
