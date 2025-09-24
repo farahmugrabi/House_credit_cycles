@@ -213,7 +213,9 @@ extrapolation_plot<- ggplot(data=data, aes(x=Date))+
         plot.title = element_text(size = 50),
         axis.text=element_text(size=50),
         axis.title=element_text(size=50),
-        legend.text =element_text(size=50))
+        legend.text =element_text(size=50))+
+  theme(panel.grid.major.x = element_line(color = "grey90", size = 0.3))+
+  labs(x = NULL)      
 ggsave(paste0(save_plots,"/banking_crisis_extrapolation_yoy.pdf"), extrapolation_plot, height = 20, width = 25)
 
 yoy_growth_plot_gni<- ggplot(data=data, aes(x=Date))+
@@ -229,7 +231,9 @@ yoy_growth_plot_gni<- ggplot(data=data, aes(x=Date))+
         plot.title = element_text(size = 50),
         axis.text=element_text(size=50),
         axis.title=element_text(size=50),
-        legend.text =element_text(size=50))
+        legend.text =element_text(size=50))+
+  theme(panel.grid.major.x = element_line(color = "grey90", size = 0.3))+
+  labs(x = NULL)      
 ggsave(paste0(save_plots,"/banking_crisis_GNI.pdf"), yoy_growth_plot_gni, height = 20, width = 25)
 
 yoy_growth_plot_rpp<- ggplot(data=data, aes(x=Date))+
@@ -245,7 +249,9 @@ yoy_growth_plot_rpp<- ggplot(data=data, aes(x=Date))+
         plot.title = element_text(size = 50),
         axis.text=element_text(size=50),
         axis.title=element_text(size=50),
-        legend.text =element_text(size=50))
+        legend.text =element_text(size=50))+
+  theme(panel.grid.major.x = element_line(color = "grey90", size = 0.3))+
+  labs(x = NULL)      
 ggsave(paste0(save_plots,"/banking_crisis_RPP.pdf"), yoy_growth_plot_rpp, height = 20, width = 25)
 
 dummy_bcrisis_2q<- ggplot(data=data, aes(x=Date))+
@@ -265,7 +271,9 @@ dummy_bcrisis_2q<- ggplot(data=data, aes(x=Date))+
         plot.title = element_text(size = 50),
         axis.text=element_text(size=50),
         axis.title=element_text(size=50),
-        legend.text =element_text(size=50))
+        legend.text =element_text(size=50))+
+  theme(panel.grid.major.x = element_line(color = "grey90", size = 0.3))+
+  labs(x = NULL)                                            
 ggsave(paste0(save_plots,"/banking_crisis_2Q.pdf"), dummy_bcrisis_2q, height = 20, width = 25)
 
 dummy_bcrisis_4q<- ggplot(data=data, aes(x=Date))+
@@ -286,7 +294,8 @@ dummy_bcrisis_4q<- ggplot(data=data, aes(x=Date))+
         plot.title = element_text(size = 50),
         axis.text=element_text(size=50),
         axis.title=element_text(size=50),
-        legend.text =element_text(size=50))
+        legend.text =element_text(size=50))+
+  theme(panel.grid.major.x = element_line(color = "grey90", size = 0.3))
 ggsave(paste0(save_plots,"/banking_crisis_4Q.pdf"), dummy_bcrisis_4q, height = 20, width = 25)
 
 #Export crisis dummy-----------------
