@@ -288,6 +288,13 @@ data<- data %>%
   mutate(Nat_cred_r= (Nat_cred*CPI)) %>% 
   mutate(Nat_cred_l= log(HH_credit_total+NFC_credit_national)) %>% 
   mutate(Nat_cred_rl= log(Nat_cred_r)) %>% 
+  
+  mutate(HH_credit_r= (HH_credit_total*CPI)) %>% #NEW
+  mutate(NFC_credit_r= (NFC_credit_national*CPI)) %>% #NEW
+  
+  mutate(Nat_cred_l= log(HH_credit_total+NFC_credit_national)) %>% 
+  mutate(Nat_cred_rl= log(Nat_cred_r)) %>% 
+  
   mutate(Nat_cred_ratio= (Nat_cred)/GNIq) %>% 
   mutate(Nat_cred_ratio_l= log10(Nat_cred_ratio)) %>% 
   mutate(Nat_cred_ratio_cl= (Nat_cred)/GNI_cl) %>% 
@@ -296,12 +303,18 @@ data<- data %>%
   mutate(Tot_cred_ratio= (Tota_cred)/GNIq) %>% 
   mutate(Tot_cred_ratio_cl= (Tota_cred)/GNI_cl) %>% 
   mutate(Nat_cred_l_sa = ifelse(!is.na(Nat_cred),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
-  mutate(Nat_cred_sa = ifelse(!is.na(Nat_cred),as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred, frequency = 4)),s.window = "periodic", robust = TRUE))), NA_real_ )) %>% 
+  
+  mutate(Nat_cred_l_sa = ifelse(!is.na(Nat_cred),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
   mutate(GNI_sa = ifelse(!is.na(GNI_cl), as.numeric(seasadj(stl(forecast::na.interp(ts(GNI_cl/1000, frequency = 4)),s.window = "periodic", robust = TRUE))),NA_real_)) %>%
   mutate(GNI_l_sa = ifelse(!is.na(GNI_cl),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(GNI_cl/1000, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>%
   mutate(rpp_price_index_sa = ifelse(!is.na(rpp_price_index), as.numeric(seasadj(stl(forecast::na.interp(ts(rpp_price_index, frequency = 4)),s.window = "periodic", robust = TRUE))), NA_real_)) %>% 
   mutate(rpp_price_index_l_sa = ifelse(!is.na(rpp_price_index), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(rpp_price_index, frequency = 4)), s.window = "periodic", robust = TRUE)))),NA_real_)) %>% 
   mutate(Nat_cred_rl_sa = ifelse(!is.na(Nat_cred_r), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(Nat_cred_r, frequency = 4)),s.window = "periodic", robust = TRUE)))), NA_real_)) %>% 
+
+  mutate(HH_cred_rl_sa = ifelse(!is.na(HH_credit_r), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(HH_credit_r, frequency = 4)),s.window = "periodic", robust = TRUE)))), NA_real_)) %>% #NEW
+  mutate(NFC_cred_rl_sa = ifelse(!is.na(NFC_credit_r), log10(as.numeric(seasadj(stl(forecast::na.interp(ts(NFC_credit_r, frequency = 4)),s.window = "periodic", robust = TRUE)))), NA_real_)) %>% #NEW
+  
+  
   mutate(GNI_rl_sa = ifelse(!is.na(GNI_rcl),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(GNI_rcl/1000, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_)) %>% 
   mutate(rpp_price_index_rl_sa = ifelse(!is.na(rpp_price_index_r),log10(as.numeric(seasadj(stl(forecast::na.interp(ts(rpp_price_index_r, frequency = 4)),s.window = "periodic", robust = TRUE)))),NA_real_))
 
@@ -312,6 +325,14 @@ colnames(data_model)<- NULL
 data_model_r<-data %>% dplyr::select(Date, GNI_rl_sa, Nat_cred_rl_sa, rpp_price_index_rl_sa) %>% 
   mutate(Date=str_to_lower(str_remove(as.yearqtr(as.Date(Date)), " "))) 
 colnames(data_model_r)<- NULL
+
+data_model2_r<-data %>% dplyr::select(Date, GNI_rl_sa, HH_cred_rl_sa, rpp_price_index_rl_sa) %>% #new
+  mutate(Date=str_to_lower(str_remove(as.yearqtr(as.Date(Date)), " "))) 
+colnames(data_model2_r)<- NULL
+
+data_model3_r<-data %>% dplyr::select(Date, GNI_rl_sa, NFC_cred_rl_sa, rpp_price_index_rl_sa) %>% #new
+  mutate(Date=str_to_lower(str_remove(as.yearqtr(as.Date(Date)), " "))) 
+colnames(data_model3_r)<- NULL
 
 #Graph on NFC
 setwd(paste0(path, "/../"))
@@ -390,6 +411,9 @@ ggsave(paste0(save_plots,"/Data/gni_plot.pdf"), gni_plot, height = 20, width = 2
 # write.csv(data_model, paste0(path, "/data_model_nominal.csv"), row.names = FALSE)#@Uncomment if nominal data needed
 write.csv(data, paste0(path, "/data_full.csv"), row.names = FALSE)
 write.csv(data_model_r, paste0(base_path, "/A_Main_Code/data_model.csv"), row.names = FALSE)
+
+write.csv(data_model2_r, paste0(base_path, "/A_Main_Code/data_model2.csv"), row.names = FALSE) #new
+write.csv(data_model3_r, paste0(base_path, "/A_Main_Code/data_model3.csv"), row.names = FALSE) #new
 
 #HH loan interest rates in order to perform VECM model
 #Loan rates data----------------------------------
