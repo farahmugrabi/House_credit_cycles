@@ -1,6 +1,6 @@
 # 📊 Reproducible Code for the Article  
 **Housing and Credit Cycles in Ireland**  
-Published in: *Research Technical Papers, Central Bank of Ireland*, Volume [x], No. [y], Year [yyyy]  
+Published in: *Research Technical Papers, Central Bank of Ireland*, Volume 2025, No. 16, Year 2025. http://dx.doi.org/10.2139/ssrn.5618632
 
 # 💻 📑 Code and Article Authors  
 This repository and all accompanying code were produced by:
