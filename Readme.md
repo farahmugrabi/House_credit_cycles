@@ -65,7 +65,8 @@ Please download the following folders and scripts. The files and directories are
   - A.Main_Code/GF3_S23_US_FIX_DYN_pars.m
   - C.Properties/C1.Bank_crisis.R
   - C.Properties/C2.Properties.R
-5. Notes 📝:
+
+# 📝 Notes:
 - 0.Data script updates data from different open source APIs. Data prior to the coverage of these APIs are provided by the Central Bank of Ireland and stored in the B.Data folder.
 - Benchmark results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_main.xlsx. The order of the variables is the following: GNI, National Credit, House prices. First three columns data, second three columns trend, last three columns cycles. Last data points correspond to the same date of the last data point of the file data_model.xlsx in A.Main_Code.
 - One side results are based on GF3_S23_US_FIX_DYN_pars.m script, results are store in A.Main_Code/Outcome/Results_oneside20.xlsx, this is used for real time and early warning properties.
