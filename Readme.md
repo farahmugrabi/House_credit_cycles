@@ -75,4 +75,5 @@ Please download the following folders and scripts. The files and directories are
    - After running: A.Main_Code/GF3_S23_US_FIX_DYN_pars.m, run A.Main_Code/Master_Recursive.m
    - Uncomment C.Properties/C2.Properties.R, section #Plot: Pseudo real time (nd: new data points) and section #3-Pseudo Real time estimates.
 - The published working paper used data until Q2 2025, however national credit was available only until Q1 2025. Therefore, in order to reproduce the same results, those datapoints should be considered. The file Data.R is set to automatically update all data. 
-- See data used in the paper, data.full_workingpaper.csv (It was stored one quarter after the working paper publication, so it might have one additional quarter. We understand there will be mayor revisions in the outanding credit provided to households, so future updates might involved differences with the published outcomes.)
+- See data used in the paper, data.full_workingpaper.csv (It was stored one quarter after the working paper publication, so it might have one additional quarter). 
+- We understand there will be mayor revisions in the outanding credit provided to households, so future updates might involve differences with the published outcomes.
