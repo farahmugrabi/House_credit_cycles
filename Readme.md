@@ -20,7 +20,7 @@ This repository and all accompanying code were produced by:
 # ✏️ Citation  
 If you use this code, please cite both the GitHub repository and the related article:  
 - **GitHub repository** 
-  -Mugrabi, F. & Rünstler, G. (202_). *Housing and Credit Cycles in Ireland*. GitHub. https://github.com/farahmugrabi/Housing_credit_cycles  
+  -Mugrabi, F. & Rünstler, G. (2025). *Housing and Credit Cycles in Ireland*. GitHub. https://github.com/farahmugrabi/Housing_credit_cycles  
 - **Articles** 
   - Rünstler, G. and Vlekke, M. (2018). *Business, housing, and credit cycles*. *Journal of Applied Econometrics*, 33(2), 212–226. https://www.jstor.org/stable/26609842
   - Mugrabi, F. & Rünstler, G. (2025). *Housing and Credit Cycles in Ireland*. *Research Technical Papers, Central Bank of Ireland*, [Volume 2025, No. 16]. [http://dx.doi.org/10.2139/ssrn.5618632]
